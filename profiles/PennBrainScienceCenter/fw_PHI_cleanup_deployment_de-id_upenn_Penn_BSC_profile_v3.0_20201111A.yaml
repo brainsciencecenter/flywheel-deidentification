@@ -1,0 +1,179 @@
+# Penn Brain Science Center de-identification profile
+#
+# Version information is encoded into de-identified headers
+# in the DeidentificationMethod field
+#
+# If modifying the profile, update the replacement string
+# for DeidentificationMethod below
+dicom:
+
+  # When processing a file to be de-identified, match dicom profile to files
+  # matching the patterns listed. Other file types (like zip) have the typical
+  # extensions by default, but some services leveraging the migration-toolkit
+  # expect no default
+  file-filter:
+    - "*.dcm*"
+    - "*.DCM*"
+    - "*.ima*"
+    - "*.IMA*"
+
+  # Use the original name rather than the default of <SOPInstanceUID>.<Modality>.dcm
+  filenames:
+    - output: '{file_name}'
+      input-regex: '^(?P<file_name>.*)$'
+
+  # patient-age-from-birthdate sets the DICOM header as a 3-digit value with a suffix
+  # be 091D, and that same age in months would be 003M. By default, if
+  # the age fits in days, then days will be used, # otherwise if it fits in months, then months
+  # will be used, otherwise years will be used
+  patient-age-from-birthdate: true
+
+  # Set patient age units as Years. Other options include months (M) and days (D)
+  patient-age-units: Y
+
+  fields:
+  - name: AccessionNumber
+    replace-with: ''
+  - name: AdditionalPatientHistory
+    replace-with: ''
+  - name: AdmittingDiagnosesDescription
+    replace-with: ''
+  - name: Allergies
+    replace-with: ''
+  - name: BranchOfService
+    replace-with: ''
+  - name: ConfidentialityConstraintOnPatientDataDescription
+    replace-with: ''
+  - name: ConsultingPhysicianIdentificationSequence
+    replace-with: ''
+  - name: ConsultingPhysicianName
+    replace-with: ''
+  - name: CountryOfResidence
+    replace-with: ''
+  - name: CurrentPatientLocation
+    replace-with: ''
+  - name: EthnicGroup
+    replace-with: ''
+  - name: InsurancePlanIdentification
+    replace-with: ''
+  - name: IssuerOfPatientID
+    replace-with: ''
+  - name: LastMenstrualDate
+    replace-with: ''
+  - name: MedicalAlerts
+    replace-with: ''
+  - name: MedicalRecordLocator
+    replace-with: ''
+  - name: MilitaryRank
+    replace-with: ''
+  - name: NameOfPhysiciansReadingStudy
+    replace-with: ''
+  - name: Occupation
+    replace-with: ''
+  - name: OtherPatientIDs
+    replace-with: ''
+  - name: OtherPatientIDsSequence
+    replace-with: ''
+  - name: OtherPatientNames
+    replace-with: ''
+  - name: PatientAddress
+    replace-with: ''
+  - name: PatientAlternativeCalendar
+    replace-with: ''
+  - name: PatientBirthDate
+    replace-with: ''
+  - name: PatientBirthDateInAlternativeCalendar
+    replace-with: ''
+  - name: PatientBirthName
+    replace-with: ''
+  - name: PatientBirthTime
+    replace-with: ''
+  - name: PatientComments
+    replace-with: ''
+  - name: PatientDeathDateInAlternativeCalendar
+    replace-with: ''
+  - name: PatientID
+    replace-with: ''
+  - name: PatientInsurancePlanCodeSequence
+    replace-with: ''
+  - name: PatientMotherBirthName
+    replace-with: ''
+  - name: PatientName
+    replace-with: ''
+  - name: PatientPrimaryLanguageCodeSequence
+    replace-with: ''
+  - name: PatientReligiousPreference
+    replace-with: ''
+  - name: PatientSexNeutered
+    replace-with: ''
+  - name: PatientSize
+    replace-with: ''
+  - name: PatientSizeCodeSequence
+    replace-with: ''
+  - name: PatientState
+    replace-with: ''
+  - name: PatientTelecomInformation
+    replace-with: ''
+  - name: PatientTelephoneNumbers
+    replace-with: ''
+  - name: PerformingPhysicianIdentificationSequence
+    replace-with: ''
+  - name: PerformingPhysicianName
+    replace-with: ''
+  - name: PertinentDocumentsSequence
+    replace-with: ''
+  - name: PhysicianApprovingInterpretation
+    replace-with: ''
+  - name: PhysiciansOfRecord
+    replace-with: ''
+  - name: PhysiciansOfRecordIdentificationSequence
+    replace-with: ''
+  - name: PhysiciansReadingStudyIdentificationSequence
+    replace-with: ''
+  - name: PregnancyStatus
+    replace-with: ''
+  - name: ReasonForStudy
+    replace-with: ''
+  - name: ReferencedPatientPhotoSequence
+    replace-with: ''
+  - name: ReferringPhysicianAddress
+    replace-with: ''
+  - name: ReferringPhysicianIdentificationSequence
+    replace-with: ''
+  - name: ReferringPhysicianName
+    replace-with: ''
+  - name: ReferringPhysicianTelephoneNumbers
+    replace-with: ''
+  - name: RegionOfResidence
+    replace-with: ''
+  - name: RequestedProcedureComments
+    replace-with: ''
+  - name: RequestingPhysician
+    replace-with: ''
+  - name: RequestingPhysicianIdentificationSequence
+    replace-with: ''
+  - name: ResponsibleOrganization
+    replace-with: ''
+  - name: ResponsiblePerson
+    replace-with: ''
+  - name: ResponsiblePersonRole
+    replace-with: ''
+  - name: ScheduledPerformingPhysicianIdentificationSequence
+    replace-with: ''
+  - name: ScheduledPerformingPhysicianName
+    replace-with: ''
+  - name: SmokingStatus
+    replace-with: ''
+  - name: SpecialNeeds
+    replace-with: ''
+  - name: DeidentificationMethod
+    replace-with: Penn_BSC_profile_v3.0
+
+# Zip file profile is necessary for DICOM zips - if the configuration settings
+# within aren't needed, the bare `zip:` is still required to process dicom
+# zips
+zip:
+  # Allow files that are not DICOM to be re-packaged in output zip without
+  # raising exceptions - we don't want to lose any non-dicom files in zips in
+  # case the user intended this
+  allow-unmatched-files: true

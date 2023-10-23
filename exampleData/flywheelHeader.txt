@@ -1,0 +1,203 @@
+
+# Dicom-File-Format
+
+# Dicom-Meta-Information-Header
+# Used TransferSyntax: Little Endian Explicit
+(0002,0000) UL 188                                      #   4, 1 FileMetaInformationGroupLength
+(0002,0001) OB 00\01                                    #   2, 1 FileMetaInformationVersion
+(0002,0002) UI =MRImageStorage                          #  26, 1 MediaStorageSOPClassUID
+(0002,0003) UI [2.25.11855366655957802449504060070008831478] #  44, 1 MediaStorageSOPInstanceUID
+(0002,0010) UI =LittleEndianExplicit                    #  20, 1 TransferSyntaxUID
+(0002,0012) UI [1.2.276.0.7230010.3.0.3.6.6]            #  28, 1 ImplementationClassUID
+(0002,0013) SH [OFFIS_DCMTK_366]                        #  16, 1 ImplementationVersionName
+
+# Dicom-Data-Set
+# Used TransferSyntax: Little Endian Explicit
+(0008,0005) CS [ISO_IR 100]                             #  10, 1 SpecificCharacterSet
+(0008,0008) CS [ORIGINAL\PRIMARY\OTHER]                 #  22, 3 ImageType
+(0008,0016) UI =MRImageStorage                          #  26, 1 SOPClassUID
+(0008,0018) UI [2.25.11855366655957802449504060070008831478] #  44, 1 SOPInstanceUID
+(0008,0020) DA [19970416]                               #   8, 1 StudyDate
+(0008,0021) DA [19970416]                               #   8, 1 SeriesDate
+(0008,0022) DA [19970416]                               #   8, 1 AcquisitionDate
+(0008,0023) DA [19970416]                               #   8, 1 ContentDate
+(0008,0030) TM [185226.153000]                          #  14, 1 StudyTime
+(0008,0031) TM [191748.335000]                          #  14, 1 SeriesTime
+(0008,0032) TM [191749.860000]                          #  14, 1 AcquisitionTime
+(0008,0033) TM [191843.338000]                          #  14, 1 ContentTime
+(0008,0050) SH (no value available)                     #   0, 0 AccessionNumber
+(0008,0060) CS [MR]                                     #   2, 1 Modality
+(0008,0070) LO [SIEMENS]                                #   8, 1 Manufacturer
+(0008,0090) PN (no value available)                     #   0, 0 ReferringPhysicianName
+(0008,0092) ST (no value available)                     #   0, 0 ReferringPhysicianAddress
+(0008,0094) SH (no value available)                     #   0, 0 ReferringPhysicianTelephoneNumbers
+(0008,0096) SQ (Sequence with explicit length #=0)      #   0, 1 ReferringPhysicianIdentificationSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0008,009c) PN (no value available)                     #   0, 0 ConsultingPhysicianName
+(0008,009d) SQ (Sequence with explicit length #=0)      #   0, 1 ConsultingPhysicianIdentificationSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0008,1030) LO [MRI ABDOMEN PELVIS W+WO CONT]           #  28, 1 StudyDescription
+(0008,103e) LO [LIVER-PELVIS/HASTE_AXIAL_P]             #  26, 1 SeriesDescription
+(0008,1048) PN (no value available)                     #   0, 0 PhysiciansOfRecord
+(0008,1049) SQ (Sequence with explicit length #=0)      #   0, 1 PhysiciansOfRecordIdentificationSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0008,1050) PN (no value available)                     #   0, 0 PerformingPhysicianName
+(0008,1052) SQ (Sequence with explicit length #=0)      #   0, 1 PerformingPhysicianIdentificationSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0008,1060) PN (no value available)                     #   0, 0 NameOfPhysiciansReadingStudy
+(0008,1062) SQ (Sequence with explicit length #=0)      #   0, 1 PhysiciansReadingStudyIdentificationSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0008,1080) LO (no value available)                     #   0, 0 AdmittingDiagnosesDescription
+(0008,1090) LO [MAGNETOM VISION plus]                   #  20, 1 ManufacturerModelName
+(0009,0010) LO [SPI RELEASE 1]                          #  14, 1 PrivateCreator
+(0009,0012) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0009,0013) LO [SIEMENS CM VA0  LAB]                    #  20, 1 PrivateCreator
+(0010,0010) PN (no value available)                     #   0, 0 PatientName
+(0010,0020) LO (no value available)                     #   0, 0 PatientID
+(0010,0021) LO (no value available)                     #   0, 0 IssuerOfPatientID
+(0010,0030) DA (no value available)                     #   0, 0 PatientBirthDate
+(0010,0032) TM (no value available)                     #   0, 0 PatientBirthTime
+(0010,0033) LO (no value available)                     #   0, 0 PatientBirthDateInAlternativeCalendar
+(0010,0034) LO (no value available)                     #   0, 0 PatientDeathDateInAlternativeCalendar
+(0010,0035) CS (no value available)                     #   0, 0 PatientAlternativeCalendar
+(0010,0040) CS [F]                                      #   2, 1 PatientSex
+(0010,0050) SQ (Sequence with explicit length #=0)      #   0, 1 PatientInsurancePlanCodeSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0010,0101) SQ (Sequence with explicit length #=0)      #   0, 1 PatientPrimaryLanguageCodeSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0010,1000) LO (no value available)                     #   0, 0 RETIRED_OtherPatientIDs
+(0010,1001) PN (no value available)                     #   0, 0 OtherPatientNames
+(0010,1002) SQ (Sequence with explicit length #=0)      #   0, 1 OtherPatientIDsSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0010,1005) PN (no value available)                     #   0, 0 PatientBirthName
+(0010,1010) AS [066Y]                                   #   4, 1 PatientAge
+(0010,1020) DS (no value available)                     #   0, 0 PatientSize
+(0010,1021) SQ (Sequence with explicit length #=0)      #   0, 1 PatientSizeCodeSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0010,1030) DS [136]                                    #   4, 1 PatientWeight
+(0010,1040) LO (no value available)                     #   0, 0 PatientAddress
+(0010,1050) LO (no value available)                     #   0, 0 RETIRED_InsurancePlanIdentification
+(0010,1060) PN (no value available)                     #   0, 0 PatientMotherBirthName
+(0010,1080) LO (no value available)                     #   0, 0 MilitaryRank
+(0010,1081) LO (no value available)                     #   0, 0 BranchOfService
+(0010,1090) LO (no value available)                     #   0, 0 RETIRED_MedicalRecordLocator
+(0010,1100) SQ (Sequence with explicit length #=0)      #   0, 1 ReferencedPatientPhotoSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0010,2000) LO (no value available)                     #   0, 0 MedicalAlerts
+(0010,2110) LO (no value available)                     #   0, 0 Allergies
+(0010,2150) LO (no value available)                     #   0, 0 CountryOfResidence
+(0010,2152) LO (no value available)                     #   0, 0 RegionOfResidence
+(0010,2154) SH (no value available)                     #   0, 0 PatientTelephoneNumbers
+(0010,2155) LT (no value available)                     #   0, 0 PatientTelecomInformation
+(0010,2160) SH (no value available)                     #   0, 0 EthnicGroup
+(0010,2180) SH (no value available)                     #   0, 0 Occupation
+(0010,21a0) CS (no value available)                     #   0, 0 SmokingStatus
+(0010,21b0) LT (no value available)                     #   0, 0 AdditionalPatientHistory
+(0010,21c0) US (no value available)                     #   0, 0 PregnancyStatus
+(0010,21d0) DA (no value available)                     #   0, 0 LastMenstrualDate
+(0010,21f0) LO (no value available)                     #   0, 0 PatientReligiousPreference
+(0010,2203) CS (no value available)                     #   0, 0 PatientSexNeutered
+(0010,2297) PN (no value available)                     #   0, 0 ResponsiblePerson
+(0010,2298) CS (no value available)                     #   0, 0 ResponsiblePersonRole
+(0010,2299) LO (no value available)                     #   0, 0 ResponsibleOrganization
+(0010,4000) LT (no value available)                     #   0, 0 PatientComments
+(0011,0010) LO [SPI RELEASE 1]                          #  14, 1 PrivateCreator
+(0011,0011) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0012,0063) LO [Penn_BSC_profile_v3.0]                  #  22, 1 DeidentificationMethod
+(0013,0010) LO [CTP]                                    #   4, 1 PrivateCreator
+(0013,1010) LO [Pseudo-PHI-DICOM-Data]                  #  22, 1 Unknown Tag & Data
+(0013,1013) LO [87009668]                               #   8, 1 Unknown Tag & Data
+(0018,0015) CS [KIDNEY]                                 #   6, 1 BodyPartExamined
+(0018,0020) CS [RM]                                     #   2, 1 ScanningSequence
+(0018,0021) CS [OSP]                                    #   4, 1 SequenceVariant
+(0018,0022) CS [SP]                                     #   2, 1 ScanOptions
+(0018,0023) CS [2D]                                     #   2, 1 MRAcquisitionType
+(0018,0024) SH [tse1]                                   #   4, 1 SequenceName
+(0018,0025) CS [N]                                      #   2, 1 AngioFlag
+(0018,0050) DS [008.000000E+00]                         #  14, 1 SliceThickness
+(0018,0080) DS [004.400000E+00]                         #  14, 1 RepetitionTime
+(0018,0081) DS [009.000000E+01]                         #  14, 1 EchoTime
+(0018,0083) DS [1]                                      #   2, 1 NumberOfAverages
+(0018,0084) DS [006.359438E+01]                         #  14, 1 ImagingFrequency
+(0018,0085) SH [1H]                                     #   2, 1 ImagedNucleus
+(0018,0086) IS [1]                                      #   2, 1 EchoNumbers
+(0018,0087) DS [1.493806]                               #   8, 1 MagneticFieldStrength
+(0018,0088) DS [1.5999984]                              #  10, 1 SpacingBetweenSlices
+(0018,0091) IS [1]                                      #   2, 1 EchoTrainLength
+(0018,0093) DS [100]                                    #   4, 1 PercentSampling
+(0018,0094) DS [75]                                     #   2, 1 PercentPhaseFieldOfView
+(0018,1000) LO [7671]                                   #   4, 1 DeviceSerialNumber
+(0018,1020) LO [VB33D]                                  #   6, 1 SoftwareVersions
+(0018,1200) DA [19950823]                               #   8, 1 DateOfLastCalibration
+(0018,1201) TM [110149.000000]                          #  14, 1 TimeOfLastCalibration
+(0018,1250) SH [BoArray]                                #   8, 1 ReceiveCoilName
+(0018,1310) US 512\0\0\104                              #   8, 4 AcquisitionMatrix
+(0018,1312) CS [COL]                                    #   4, 1 InPlanePhaseEncodingDirection
+(0018,1314) DS [150]                                    #   4, 1 FlipAngle
+(0018,1316) DS [0]                                      #   2, 1 SAR
+(0018,5100) CS [HFS]                                    #   4, 1 PatientPosition
+(0019,0010) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0019,0012) LO [SIEMENS MR VA0  GEN]                    #  20, 1 PrivateCreator
+(0019,0014) LO [SIEMENS MR VA0  COAD]                   #  20, 1 PrivateCreator
+(0019,0015) LO [SIEMENS CM VA0  ACQU]                   #  20, 1 PrivateCreator
+(0020,000d) UI [2.25.250849867305193796630300506298189987318] #  44, 1 StudyInstanceUID
+(0020,000e) UI [2.25.115502210980931447594853482093891665398] #  44, 1 SeriesInstanceUID
+(0020,0010) SH (no value available)                     #   0, 0 StudyID
+(0020,0011) IS [15]                                     #   2, 1 SeriesNumber
+(0020,0012) IS [1]                                      #   2, 1 AcquisitionNumber
+(0020,0013) IS [245]                                    #   4, 1 InstanceNumber
+(0020,0030) DS [-01.923693E+02\-1.906080E+02\01.128700E+00] #  42, 3 RETIRED_ImagePosition
+(0020,0032) DS [-193.05291\-191.29165\1.1287]           #  28, 3 ImagePositionPatient
+(0020,0035) DS [001.000000E+00\-0.000000E+00\-0.000000E+00\00.000000E+00\01.000000... #  84, 6 RETIRED_ImageOrientation
+(0020,0037) DS [1\-0\-0\0\1\-0]                         #  14, 6 ImageOrientationPatient
+(0020,0050) DS [-01.128700E+00]                         #  14, 1 RETIRED_Location
+(0020,0052) UI [2.25.126235514382660822480216755514983955958] #  44, 1 FrameOfReferenceUID
+(0020,0070) LO [PLANAR]                                 #   6, 1 RETIRED_ImageGeometryType
+(0020,0080) CS (no value available)                     #   0, 0 RETIRED_MaskingImage
+(0020,1001) IS [1]                                      #   2, 1 RETIRED_AcquisitionsInSeries
+(0020,1040) LO (no value available)                     #   0, 0 PositionReferenceIndicator
+(0020,1041) DS [-01.128700E+00]                         #  14, 1 SliceLocation
+(0020,4000) LT [POST  CONTRAST]                         #  14, 1 ImageComments
+(0021,0010) LO [SIEMENS MED]                            #  12, 1 PrivateCreator
+(0021,0011) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0021,0013) LO [SIEMENS MR VA0  GEN]                    #  20, 1 PrivateCreator
+(0021,0023) LO [SIEMENS MR VA0  RAW]                    #  20, 1 PrivateCreator
+(0021,1011) DS (no value available)                     #   0, 0 Target
+(0028,0002) US 1                                        #   2, 1 SamplesPerPixel
+(0028,0004) CS [MONOCHROME2]                            #  12, 1 PhotometricInterpretation
+(0028,0005) US (no value available)                     #   0, 0 RETIRED_ImageDimensions
+(0028,0010) US 256                                      #   2, 1 Rows
+(0028,0011) US 256                                      #   2, 1 Columns
+(0028,0030) DS [001.367188E+00\01.367188E+00]           #  28, 2 PixelSpacing
+(0028,0040) CS [RECT]                                   #   4, 1 RETIRED_ImageFormat
+(0028,0100) US 16                                       #   2, 1 BitsAllocated
+(0028,0101) US 12                                       #   2, 1 BitsStored
+(0028,0102) US 11                                       #   2, 1 HighBit
+(0028,0103) US 0                                        #   2, 1 PixelRepresentation
+(0028,0200) US (no value available)                     #   0, 0 RETIRED_ImageLocation
+(0028,0303) CS [MODIFIED]                               #   8, 1 LongitudinalTemporalInformationModified
+(0028,1050) DS [1012\1012]                              #  10, 2 WindowCenter
+(0028,1051) DS [2214\2214]                              #  10, 2 WindowWidth
+(0029,0011) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0031,0010) LO [AGFA PACS Archive Mirroring 1.0]        #  32, 1 PrivateCreator
+(0032,000a) CS [READ]                                   #   4, 1 RETIRED_StudyStatusID
+(0032,000c) CS [LOW]                                    #   4, 1 RETIRED_StudyPriorityID
+(0032,1030) LO (no value available)                     #   0, 0 RETIRED_ReasonForStudy
+(0032,1031) SQ (Sequence with explicit length #=0)      #   0, 1 RequestingPhysicianIdentificationSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0032,1032) PN (no value available)                     #   0, 0 RequestingPhysician
+(0038,0050) LO (no value available)                     #   0, 0 SpecialNeeds
+(0038,0100) SQ (Sequence with explicit length #=0)      #   0, 1 PertinentDocumentsSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0038,0300) LO (no value available)                     #   0, 0 CurrentPatientLocation
+(0038,0500) LO (no value available)                     #   0, 0 PatientState
+(0040,0006) PN (no value available)                     #   0, 0 ScheduledPerformingPhysicianName
+(0040,0007) LO [MRI ABDOMEN PELVIS W+WO CONT]           #  28, 1 ScheduledProcedureStepDescription
+(0040,0009) SH [620115]                                 #   6, 1 ScheduledProcedureStepID
+(0040,000b) SQ (Sequence with explicit length #=0)      #   0, 1 ScheduledPerformingPhysicianIdentificationSequence
+(fffe,e0dd) na (SequenceDelimitationItem for re-encod.) #   0, 0 SequenceDelimitationItem
+(0040,1400) LT (no value available)                     #   0, 0 RequestedProcedureComments
+(0040,3001) LO (no value available)                     #   0, 0 ConfidentialityConstraintOnPatientDataDescription
+(0051,0010) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(4008,0114) PN (no value available)                     #   0, 0 RETIRED_PhysicianApprovingInterpretation
+(7fe0,0010) OW 0000\0000\0000\0000\0000\0000\0000\0000\0000\0000\0000\0000\0000... # 131072, 1 PixelData

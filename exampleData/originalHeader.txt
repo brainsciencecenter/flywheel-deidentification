@@ -1,0 +1,133 @@
+
+# Dicom-File-Format
+
+# Dicom-Meta-Information-Header
+# Used TransferSyntax: Little Endian Explicit
+(0002,0000) UL 188                                      #   4, 1 FileMetaInformationGroupLength
+(0002,0001) OB 00\01                                    #   2, 1 FileMetaInformationVersion
+(0002,0002) UI =MRImageStorage                          #  26, 1 MediaStorageSOPClassUID
+(0002,0003) UI [2.25.144114175999880406606562736539424112118] #  44, 1 MediaStorageSOPInstanceUID
+(0002,0010) UI =LittleEndianExplicit                    #  20, 1 TransferSyntaxUID
+(0002,0012) UI [1.2.276.0.7230010.3.0.3.6.6]            #  28, 1 ImplementationClassUID
+(0002,0013) SH [OFFIS_DCMTK_366]                        #  16, 1 ImplementationVersionName
+
+# Dicom-Data-Set
+# Used TransferSyntax: Little Endian Explicit
+(0008,0005) CS [ISO_IR 100]                             #  10, 1 SpecificCharacterSet
+(0008,0008) CS [ORIGINAL\PRIMARY\OTHER]                 #  22, 3 ImageType
+(0008,0016) UI =MRImageStorage                          #  26, 1 SOPClassUID
+(0008,0018) UI [2.25.144114175999880406606562736539424112118] #  44, 1 SOPInstanceUID
+(0008,0020) DA [19970416]                               #   8, 1 StudyDate
+(0008,0021) DA [19970416]                               #   8, 1 SeriesDate
+(0008,0022) DA [19970416]                               #   8, 1 AcquisitionDate
+(0008,0023) DA [19970416]                               #   8, 1 ContentDate
+(0008,0030) TM [185226.153000]                          #  14, 1 StudyTime
+(0008,0031) TM [191748.335000]                          #  14, 1 SeriesTime
+(0008,0032) TM [191749.860000]                          #  14, 1 AcquisitionTime
+(0008,0033) TM [191843.338000]                          #  14, 1 ContentTime
+(0008,0050) SH [597B9256]                               #   8, 1 AccessionNumber
+(0008,0060) CS [MR]                                     #   2, 1 Modality
+(0008,0070) LO [SIEMENS]                                #   8, 1 Manufacturer
+(0008,0090) PN [SMITH^MICHELE]                          #  14, 1 ReferringPhysicianName
+(0008,1030) LO [MRI ABDOMEN PELVIS W+WO CONT]           #  28, 1 StudyDescription
+(0008,103e) LO [LIVER-PELVIS/HASTE_AXIAL_P]             #  26, 1 SeriesDescription
+(0008,1050) PN [WADE^MEGAN]                             #  10, 1 PerformingPhysicianName
+(0008,1080) LO [LIVER/KIDNEY/PELVIS]                    #  20, 1 AdmittingDiagnosesDescription
+(0008,1090) LO [MAGNETOM VISION plus]                   #  20, 1 ManufacturerModelName
+(0009,0010) LO [SPI RELEASE 1]                          #  14, 1 PrivateCreator
+(0009,0012) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0009,0013) LO [SIEMENS CM VA0  LAB]                    #  20, 1 PrivateCreator
+(0010,0010) PN [MILLER^BEVERLY]                         #  14, 1 PatientName
+(0010,0020) LO [9894340694]                             #  10, 1 PatientID
+(0010,0030) DA [19310227]                               #   8, 1 PatientBirthDate
+(0010,0040) CS [F]                                      #   2, 1 PatientSex
+(0010,1010) AS [066Y]                                   #   4, 1 PatientAge
+(0010,1030) DS [136]                                    #   4, 1 PatientWeight
+(0010,1040) LO [56 Walnut Drive,San DiFrangeles,California] #  42, 1 PatientAddress
+(0010,2154) SH [555-225-5887]                           #  12, 1 PatientTelephoneNumbers
+(0010,21b0) LT [RENAL CA]                               #   8, 1 AdditionalPatientHistory
+(0011,0010) LO [SPI RELEASE 1]                          #  14, 1 PrivateCreator
+(0011,0011) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0013,0010) LO [CTP]                                    #   4, 1 PrivateCreator
+(0013,1010) LO [Pseudo-PHI-DICOM-Data]                  #  22, 1 Unknown Tag & Data
+(0013,1013) LO [87009668]                               #   8, 1 Unknown Tag & Data
+(0018,0015) CS [KIDNEY]                                 #   6, 1 BodyPartExamined
+(0018,0020) CS [RM]                                     #   2, 1 ScanningSequence
+(0018,0021) CS [OSP]                                    #   4, 1 SequenceVariant
+(0018,0022) CS [SP]                                     #   2, 1 ScanOptions
+(0018,0023) CS [2D]                                     #   2, 1 MRAcquisitionType
+(0018,0024) SH [tse1]                                   #   4, 1 SequenceName
+(0018,0025) CS [N]                                      #   2, 1 AngioFlag
+(0018,0050) DS [008.000000E+00]                         #  14, 1 SliceThickness
+(0018,0080) DS [004.400000E+00]                         #  14, 1 RepetitionTime
+(0018,0081) DS [009.000000E+01]                         #  14, 1 EchoTime
+(0018,0083) DS [1]                                      #   2, 1 NumberOfAverages
+(0018,0084) DS [006.359438E+01]                         #  14, 1 ImagingFrequency
+(0018,0085) SH [1H]                                     #   2, 1 ImagedNucleus
+(0018,0086) IS [1]                                      #   2, 1 EchoNumbers
+(0018,0087) DS [1.493806]                               #   8, 1 MagneticFieldStrength
+(0018,0088) DS [1.5999984]                              #  10, 1 SpacingBetweenSlices
+(0018,0091) IS [1]                                      #   2, 1 EchoTrainLength
+(0018,0093) DS [100]                                    #   4, 1 PercentSampling
+(0018,0094) DS [75]                                     #   2, 1 PercentPhaseFieldOfView
+(0018,1000) LO [7671]                                   #   4, 1 DeviceSerialNumber
+(0018,1020) LO [VB33D]                                  #   6, 1 SoftwareVersions
+(0018,1200) DA [19950823]                               #   8, 1 DateOfLastCalibration
+(0018,1201) TM [110149.000000]                          #  14, 1 TimeOfLastCalibration
+(0018,1250) SH [BoArray]                                #   8, 1 ReceiveCoilName
+(0018,1310) US 512\0\0\104                              #   8, 4 AcquisitionMatrix
+(0018,1312) CS [COL]                                    #   4, 1 InPlanePhaseEncodingDirection
+(0018,1314) DS [150]                                    #   4, 1 FlipAngle
+(0018,1316) DS [0]                                      #   2, 1 SAR
+(0018,5100) CS [HFS]                                    #   4, 1 PatientPosition
+(0019,0010) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0019,0012) LO [SIEMENS MR VA0  GEN]                    #  20, 1 PrivateCreator
+(0019,0014) LO [SIEMENS MR VA0  COAD]                   #  20, 1 PrivateCreator
+(0019,0015) LO [SIEMENS CM VA0  ACQU]                   #  20, 1 PrivateCreator
+(0020,000d) UI [2.25.250849867305193796630300506298189987318] #  44, 1 StudyInstanceUID
+(0020,000e) UI [2.25.115502210980931447594853482093891665398] #  44, 1 SeriesInstanceUID
+(0020,0010) SH (no value available)                     #   0, 0 StudyID
+(0020,0011) IS [15]                                     #   2, 1 SeriesNumber
+(0020,0012) IS [1]                                      #   2, 1 AcquisitionNumber
+(0020,0013) IS [238]                                    #   4, 1 InstanceNumber
+(0020,0030) DS [-01.923693E+02\-1.906080E+02\06.832870E+01] #  42, 3 RETIRED_ImagePosition
+(0020,0032) DS [-193.05291\-191.29165\68.3287]          #  30, 3 ImagePositionPatient
+(0020,0035) DS [001.000000E+00\-0.000000E+00\-0.000000E+00\00.000000E+00\01.000000... #  84, 6 RETIRED_ImageOrientation
+(0020,0037) DS [1\-0\-0\0\1\-0]                         #  14, 6 ImageOrientationPatient
+(0020,0050) DS [-06.832870E+01]                         #  14, 1 RETIRED_Location
+(0020,0052) UI [2.25.126235514382660822480216755514983955958] #  44, 1 FrameOfReferenceUID
+(0020,0070) LO [PLANAR]                                 #   6, 1 RETIRED_ImageGeometryType
+(0020,0080) CS (no value available)                     #   0, 0 RETIRED_MaskingImage
+(0020,1001) IS [1]                                      #   2, 1 RETIRED_AcquisitionsInSeries
+(0020,1040) LO (no value available)                     #   0, 0 PositionReferenceIndicator
+(0020,1041) DS [-06.832870E+01]                         #  14, 1 SliceLocation
+(0020,4000) LT [POST  CONTRAST]                         #  14, 1 ImageComments
+(0021,0010) LO [SIEMENS MED]                            #  12, 1 PrivateCreator
+(0021,0011) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0021,0013) LO [SIEMENS MR VA0  GEN]                    #  20, 1 PrivateCreator
+(0021,0023) LO [SIEMENS MR VA0  RAW]                    #  20, 1 PrivateCreator
+(0021,1011) DS (no value available)                     #   0, 0 Target
+(0028,0002) US 1                                        #   2, 1 SamplesPerPixel
+(0028,0004) CS [MONOCHROME2]                            #  12, 1 PhotometricInterpretation
+(0028,0005) US (no value available)                     #   0, 0 RETIRED_ImageDimensions
+(0028,0010) US 256                                      #   2, 1 Rows
+(0028,0011) US 256                                      #   2, 1 Columns
+(0028,0030) DS [001.367188E+00\01.367188E+00]           #  28, 2 PixelSpacing
+(0028,0040) CS [RECT]                                   #   4, 1 RETIRED_ImageFormat
+(0028,0100) US 16                                       #   2, 1 BitsAllocated
+(0028,0101) US 12                                       #   2, 1 BitsStored
+(0028,0102) US 11                                       #   2, 1 HighBit
+(0028,0103) US 0                                        #   2, 1 PixelRepresentation
+(0028,0200) US (no value available)                     #   0, 0 RETIRED_ImageLocation
+(0028,0303) CS [MODIFIED]                               #   8, 1 LongitudinalTemporalInformationModified
+(0028,1050) DS [1021\1021]                              #  10, 2 WindowCenter
+(0028,1051) DS [2251\2251]                              #  10, 2 WindowWidth
+(0029,0011) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(0031,0010) LO [AGFA PACS Archive Mirroring 1.0]        #  32, 1 PrivateCreator
+(0032,000a) CS [READ]                                   #   4, 1 RETIRED_StudyStatusID
+(0032,000c) CS [LOW]                                    #   4, 1 RETIRED_StudyPriorityID
+(0032,1030) LO [RENAL CA]                               #   8, 1 RETIRED_ReasonForStudy
+(0040,0007) LO [MRI ABDOMEN PELVIS W+WO CONT]           #  28, 1 ScheduledProcedureStepDescription
+(0040,0009) SH [620115]                                 #   6, 1 ScheduledProcedureStepID
+(0051,0010) LO [SIEMENS CM VA0  CMS]                    #  20, 1 PrivateCreator
+(7fe0,0010) OW 0000\0000\0000\0000\0000\0000\0000\0000\0000\0000\0000\0000\0000... # 131072, 1 PixelData
