@@ -36,7 +36,7 @@ As used by the reaper on HUP6 since November 2019.
 
 ## Verifying de-identification
 
-To test the deidentification profile, use `fw deid test`. This will produce a CSV file
+To test the deidentification profile, use [`fw deid test`](https://docs.flywheel.io/hc/en-us/articles/1500010369681-Test-your-de-id-profile-using-the-fw-deid-command). This will produce a CSV file
 with the keywords and values removed from a data set.
 
 After ingest, you can download and examine dicom images with gdcmscanner.
