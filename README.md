@@ -15,7 +15,7 @@ Flywheel**.
 
 If uploading data manually, or from a new source, test and verify the de-identification.
 First use `fw deid test` (see the [profile
-page](flywheel-deidentification/profiles/PennBrainScienceCenter/README.md) for details).
+page](profiles/PennBrainScienceCenter/README.md) for details).
 Then upload a single session and check carefully. Notify the admins of any problems.
 
 If you require a different de-identification profile than the site profile, please contact
