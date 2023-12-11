@@ -70,16 +70,19 @@ Potential de-identification failures may arise from:
 * Burned-in annotations. Clinical data may have patient information present in the pixel
   data. This needs special handling.
 
-* Identifiers in non-DICOM imaging data. It is theoretically possible, though rare, for
-  identifiers to be present in NIFTI image data. **Headers and images for data from any new
+* Identifiers in non-DICOM imaging data. Identifiers may be present in other file types including NIFTI image data,
+  ZIP archive metadata, and JSON sidecars. **Headers, images and metadata from any new
   source should be checked manually.**
 
 
 ## Further de-identification for data sharing
 
-The site profiles do remove all potential indirect identifiers. Information that
+The site profiles do not remove all potential indirect identifiers. Information that
 identifies the study date, scanner, or internal study identifiers can remain present in
 the header.
+
+Additionally
+
 
 Custom secondary de-identification is available through the [deid-export
 ](https://gitlab.com/flywheel-io/flywheel-apps/deid-export) gear.
