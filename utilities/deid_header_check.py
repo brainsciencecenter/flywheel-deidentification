@@ -7,6 +7,8 @@ import pandas as pd
 import pydicom
 import re
 
+from tqdm import tqdm
+
 def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier_keys, data_dict):
 
     test_acq = None
@@ -22,9 +24,16 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
                 # Should be able to use f.zip_member_count, but this sometimes None
                 # even when the zip file is not empty
                 if (f.name.lower().endswith('.zip')) and f.size > 512:
-                    test_acq = acq
-                    test_file = f
-                    break
+                    try:
+                        f = f.reload()
+                        image_type = f.info['ImageType']
+                        if 'PRIMARY' in [ t.upper() for t in image_type ]:
+                            test_acq = acq
+                            test_file = f
+                            break
+                    except KeyError:
+                        pass
+
 
     if test_acq is None:
         data_dict['subject_id'].append(sub_id)
@@ -39,7 +48,11 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
         data_dict['header_deidentification_method'].append(pd.NA)
         data_dict['header_has_patient_identifiers'].append(pd.NA)
         data_dict['header_patient_identifiers_populated'].append(pd.NA)
+        data_dict['session_checked'].append(False)
         return
+
+    # Important to clearly flag cases where the session was not checked
+    session_checked = False
 
     acq_label = test_acq.label
     acq_id = test_acq.id
@@ -61,33 +74,42 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
         os.remove(tmp_dcm_file)
 
     # Download the first file in the zip archive
-    fw_dcm = test_file.get_zip_info().members[0]
-    test_file.download_zip_member(fw_dcm.path, tmp_dcm_file)
-
-    # try to read the file, but catch exception
     try:
-        dcm = pydicom.dcmread(tmp_dcm_file)
+        fw_dcm = test_file.get_zip_info().members[0]
+        test_file.download_zip_member(fw_dcm.path, tmp_dcm_file)
 
-        if ('DeidentificationMethod' in dcm):
-            dcm_deid_method = dcm['DeidentificationMethod'].value
+        # try to read the file, but catch exception
+        try:
+            dcm = pydicom.dcmread(tmp_dcm_file)
 
-        identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in dcm]
+            if ('DeidentificationMethod' in dcm):
+                dcm_deid_method = dcm['DeidentificationMethod'].value
 
-        for key in identifier_keys:
-            # Need to enumerate data element here and check if empty
-            element = dcm.data_element(key)
-            if not element.is_empty:
-                dcm_has_patient_identifiers = True
-                # Check for alphanumeric characters
-                if any(char.isalnum() for char in str(element.value)):
-                    dcm_patient_identifiers_populated = True
-    except pydicom.errors.InvalidDicomError:
-        print(f"Cannot read dicom from {sub_label}/{ses_label}/{acq_label}/{file_name}")
-        dcm_deid_method = 'InvalidDicomError'
-        dcm_has_patient_identifiers = 'InvalidDicomError'
-        dcm_patient_identifiers_populated = 'InvalidDicomError'
+            identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in dcm]
 
-    os.remove(tmp_dcm_file)
+            for key in identifier_keys:
+                # Need to enumerate data element here and check if empty
+                element = dcm.data_element(key)
+                if not element.is_empty:
+                    dcm_has_patient_identifiers = True
+                    # Check for alphanumeric characters
+                    if any(char.isalnum() for char in str(element.value)):
+                        dcm_patient_identifiers_populated = True
+            session_checked = True
+        except pydicom.errors.InvalidDicomError:
+            print(f"Cannot read dicom from {sub_label}/{ses_label}/{acq_label}/{file_name}")
+            dcm_deid_method = 'InvalidDicomError'
+            dcm_has_patient_identifiers = 'InvalidDicomError'
+            dcm_patient_identifiers_populated = 'InvalidDicomError'
+    except Exception as e:
+        print(f"Error processing {sub_label}/{ses_label}/{acq_label}/{file_name}")
+        print(f"Cannot download dicom file from zip archive: {e}")
+        dcm_deid_method = 'FlywheelDownloadError'
+        dcm_has_patient_identifiers = 'FlywheelDownloadError'
+        dcm_patient_identifiers_populated = 'FlywheelDownloadError'
+    finally:
+        if os.path.exists(tmp_dcm_file):
+            os.remove(tmp_dcm_file)
 
     data_dict['subject_id'].append(sub_id)
     data_dict['subject_label'].append(sub_label)
@@ -101,6 +123,7 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
     data_dict['header_deidentification_method'].append(dcm_deid_method)
     data_dict['header_has_patient_identifiers'].append(dcm_has_patient_identifiers)
     data_dict['header_patient_identifiers_populated'].append(dcm_patient_identifiers_populated)
+    data_dict['session_checked'].append(session_checked)
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
@@ -116,9 +139,29 @@ file's data from the server. It can optionally take a list of session IDs.
 
 What this script does:
      * Iterates over every subject, session or a selected list of sessions
-     * Find the first acquisition with a dicom zip file (ignoring PhoenixZipReport)
+     * Find the first acquisition with a dicom zip file (ignoring PhoenixZipReports and other unreliable files)
      * Downloads the first dicom file from the zip and check its header
-     * Report if identifiers are found
+     * Reports if identifiers are found
+     * Reports if a session could be checked - the last column of the output will be false if the session
+       did not contain any data that could be checked
+
+DICOM fields checked: The list of fields to be checked will be printed to the screen when the script is run.
+
+Important output fields:
+
+  header_has_patient_identifiers:
+    True if the dicom file contains any of the patient identifier fields, unless the field is empty. If the data
+    was de-identified correctly, these fields will exist (they are created if the source data does not contain them)
+    but will be empty.
+
+  header_patient_identifiers_populated:
+    True if the patient identifier fields contain alphanumeric characters. This is a good indicator that the data was
+    not de-identified correctly. To identify false-positives, this will be false if the field does not contain any
+    alphanumeric characters. For example, if the PatientName field contains only spaces, or is something like '######'.
+
+  session_checked:
+    True if a file could be checked for the session. If this is false, the session did not contain any dicom files that
+    could be checked, or the acquisition that was inspected could not be read for some reason.
 
 The dicom files are stored in the current working directory - they will be deleted but the user may
 have to manually remove them if the script is interrupted.
@@ -130,6 +173,17 @@ The header_ fields pertain to the header of the first DICOM file in the zip arch
 distinct from the file's metadata (which can be checked with deid_check.py).
 
 What this script does not do:
+
+    * Check all dicom files in a session. It would take far too long to do this. It looks for the first
+      zip archive containing dicom files with the image type PRIMARY. It will not check individual files
+      (eg, physio files).
+
+    * Check secondary captures, like segmentations from PACS. Secondary data often uses private
+      tags to store information, this script cannot check these effectively. They can also produce
+      false negatives because they sometimes do not inherit identifiers from the primary image.
+
+    * Check files that have not run through the Flywheel DICOM classifier. These will not have the necessary
+      metadata for the script to work.
 
     * Check non-DICOM files (eg, NIFTI). Usually these will inherit identifiers from DICOM files.
       While NIFTI files generally do not contain identifiers, it is possible that subject IDs could
@@ -143,7 +197,7 @@ What this script does not do:
       method, beyond checking the selected direct identifiers.
 
     * Check metadata above the file level, for example it does not check if the Subject container
-      contains PII. Often these will only be populated through DICOM import.
+      contains PII.
 
     * Check any private tags.
 
@@ -154,8 +208,9 @@ required.add_argument("project", help="Project label", type=str)
 
 optional = parser.add_argument_group('Optional arguments')
 optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
-optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line. " \
-                      "Use this to check a subset of sessions in the project.", type=str, default = None)
+optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line. This session list "
+                      "need not be from a single project / group, just use an appropriate placeholder eg 'various', when "
+                      "running the script.", type=str, default = None)
 
 args = parser.parse_args()
 
@@ -165,7 +220,7 @@ fw = flywheel.Client()
 data_dict = {'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[],
              'acquisition_id':[], 'acquisition_label':[], 'file_name':[],'file_user':[],
              'file_created':[], 'header_deidentification_method':[],
-             'header_has_patient_identifiers':[], 'header_patient_identifiers_populated':[]}
+             'header_has_patient_identifiers':[], 'header_patient_identifiers_populated':[], 'session_checked':[]}
 
 # List of patient direct identifiers to check. If ANY of these exist for a file,
 # then set file_has_patient_identifiers = True
@@ -184,13 +239,18 @@ group_label = args.group
 project_label = args.project
 sessions_fn = args.sessions
 
-# Get the project
-project = fw.lookup(f"{group_label}/{project_label}")
+# Print out the list of patient identifiers we will check
+print("Checking for patient identifiers in the following fields:")
+for id_key in patient_identifier_keys:
+    print(f"  {id_key}")
 
 if sessions_fn is not None:
+
+    print(f"Checking sessions listed in {sessions_fn}")
+
     with open(sessions_fn, 'r') as sessions_io:
         session_ids = [ ses_id.rstrip() for ses_id in sessions_io.readlines()]
-    for ses_id in session_ids:
+    for ses_id in tqdm(session_ids):
         try:
             ses = fw.get(ses_id)
             sub = ses.subject
@@ -202,12 +262,20 @@ if sessions_fn is not None:
             print(f"Cannot get session {ses_id}: {e}")
             continue
 else:
-    # Get the subjects in the project as an iterator so they don't need to be returned
-    # All at once - this saves time upfront.
-    subjects = project.subjects.iter()
+
+    print(f"Checking all sessions in {group_label}/{project_label}")
+
+    # Get the project
+    project = fw.lookup(f"{group_label}/{project_label}")
+
+    # Note: this is the FW recommended way, but it doesn't let you know the progress very accurately
+    # Also doesn't seem to be much faster if at all for project I've tested (few hundred to low thousands)
+    # subjects = project.subjects.iter()
+
+    subjects = project.subjects()
 
     # Loop over the subjects
-    for sub in subjects:
+    for sub in tqdm(subjects):
         # Get the subject label for our data_dict
         sub_label = sub.label
         sub_id = sub.id

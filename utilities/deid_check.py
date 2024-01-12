@@ -5,11 +5,13 @@ import flywheel
 import pandas as pd
 import re
 
-def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, file_type, patient_identifier_keys, data_dict):
+from tqdm import tqdm
+
+def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, select_file_type, patient_identifier_keys, data_dict):
     acq_label = acq.label
     acq_id = acq.id
     for f in acq.files:
-        if file_type != 'all' and f.type != file_type:
+        if select_file_type != 'all' and f.type != select_file_type:
             continue
         f = f.reload()
         file_name = f.name
@@ -17,6 +19,7 @@ def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, file_ty
         file_created = str(f.created.date())
         file_info = f.info
         file_deid_method = pd.NA
+        file_type = f.type
         file_has_patient_identifiers = False
         file_patient_identifiers_populated = False
         file_has_info = True
@@ -42,6 +45,7 @@ def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, file_ty
         data_dict['acquisition_id'].append(acq_id)
         data_dict['acquisition_label'].append(acq_label)
         data_dict['file_name'].append(file_name)
+        data_dict['file_type'].append(file_type)
         data_dict['file_user'].append(file_user)
         data_dict['file_created'].append(file_created)
         data_dict['file_has_info'].append(file_has_info)
@@ -52,14 +56,17 @@ def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, file_ty
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
                                  prog="deid_check", add_help=False, description='''
-Script to check Flywheel DICOM file / archive metadata for de-identification method and common
+Script to check Flywheel DICOM file / archive *metadata* for de-identification method and common
 patient identifiers.
+
+Note that this script does not check the DICOM files themselves. It checks the metadata attached
+to the file container in the Flywheel system.
 
 Output is a CSV file containing results for every DICOM file or DICOM zip archive in the project.
 The output file is named group_project_dicom_deid_report.csv.
 
 Because this iterates over all files in a project, it can take some time to retrieve each file's
-data from the server (based on initial tests, the script processes about 5 files / second).
+data from the server.
 
 What this script does:
      * Iterates over every subject, session, acquisition, file container.
@@ -70,19 +77,17 @@ What this script does not do:
     * Check the DICOM files themselves. We trust that Flywheel's classification will capture
       identifiers if present, and place them in the file container.
 
-    * Check non-DICOM files (eg, NIFTI). Usually these will inherit identifiers from DICOM files.
-
     * Check all possible identifiers. The script checks a selection of direct identifiers including
       PatientName, PatientID, PatientAddress, and PatientBirthDate.
 
-    * Validate the de-identification. The script outputs the reported deidentification method, but
-      does not check that the de-identification actually happened to the specification of that
+    * Validate the reported de-identification method. The script outputs the reported deidentification method,
+      but does not check that the de-identification actually happened to the specification of that
       method.
 
     * Check metadata above the file level, for example it does not check if the Subject container
       contains PII. Often these will only be populated through DICOM import.
 
-    * Check any private tags.
+    * Check any private tags or other custom metadata.
 
 ''')
 required = parser.add_argument_group('Required arguments')
@@ -100,10 +105,9 @@ args = parser.parse_args()
 fw = flywheel.Client()
 
 # First generate our "data dictionary" that will contain the values we want to track
-data_dict = {'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[],
-             'acquisition_id':[], 'acquisition_label':[], 'file_name':[],'file_user':[],
-             'file_created':[], 'file_has_info':[], 'file_deidentification_method':[],
-             'file_has_patient_identifiers':[], 'file_patient_identifiers_populated':[]}
+data_dict = {'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[], 'acquisition_id':[],
+             'acquisition_label':[], 'file_name':[], 'file_type':[], 'file_user':[], 'file_created':[], 'file_has_info':[],
+             'file_deidentification_method':[], 'file_has_patient_identifiers':[], 'file_patient_identifiers_populated':[]}
 
 # List of patient direct identifiers to check. If ANY of these exist for a file,
 # then set file_has_patient_identifiers = True
@@ -122,13 +126,21 @@ group_label = args.group
 project_label = args.project
 sessions_fn = args.sessions
 
-# Get the project
-project = fw.lookup(f"{group_label}/{project_label}")
+# Print out the list of patient identifiers we will check
+print("Checking for patient identifiers in the following fields:")
+for id_key in patient_identifier_keys:
+    print(f"  {id_key}")
+
+# Print out the list of file types we will check
+print(f"Checking files of type: {args.file_type}")
 
 if sessions_fn is not None:
+
+    print(f"Checking sessions listed in {sessions_fn}")
+
     with open(sessions_fn, 'r') as sessions_io:
         session_ids = [ ses_id.rstrip() for ses_id in sessions_io.readlines()]
-    for ses_id in session_ids:
+    for ses_id in tqdm(session_ids):
         ses = fw.get(ses_id)
         sub = ses.subject
         sub_label = sub.label
@@ -138,12 +150,18 @@ if sessions_fn is not None:
         for acq in acquisitions:
             add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, args.file_type, patient_identifier_keys, data_dict)
 else:
-    # Get the subjects in the project as an iterator so they don't need to be returned
-    # All at once - this saves time upfront.
-    subjects = project.subjects.iter()
+
+    print(f"Checking all sessions in {group_label}/{project_label}")
+
+    # Get the project
+    project = fw.lookup(f"{group_label}/{project_label}")
+
+    # Note we get a list here instead of using a generator so we can track progress
+    # We use the generators at the session and acquisition levels
+    subjects = project.subjects()
 
     # Loop over the subjects
-    for sub in subjects:
+    for sub in tqdm(subjects):
         # Get the subject label for our data_dict
         sub_label = sub.label
         sub_id = sub.id
@@ -163,5 +181,5 @@ df = pd.DataFrame.from_dict(data_dict)
 
 # write file
 
-filename = f"{group_label}_{project_label}_{args.file_type}_deid_report.csv"
+filename = f"{group_label}_{project_label}_{args.file_type}_file_metadata_deid_report.csv"
 df.to_csv(filename,index=False, na_rep = 'NA')
