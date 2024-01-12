@@ -55,7 +55,7 @@ def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, select_
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
-                                 prog="deid_check", add_help=False, description='''
+                                 prog="deid_metadata_check", add_help=False, description='''
 Script to check Flywheel DICOM file / archive *metadata* for de-identification method and common
 patient identifiers.
 
