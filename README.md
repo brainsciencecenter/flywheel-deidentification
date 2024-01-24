@@ -81,9 +81,6 @@ The site profiles do not remove all potential indirect identifiers. Information 
 identifies the study date, scanner, or internal study identifiers can remain present in
 the header.
 
-Additionally
-
-
 Custom secondary de-identification is available through the [deid-export
 ](https://gitlab.com/flywheel-io/flywheel-apps/deid-export) gear.
 
