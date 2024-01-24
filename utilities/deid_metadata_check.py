@@ -3,11 +3,26 @@
 import argparse
 import flywheel
 import pandas as pd
-import re
+import sys
 
 from tqdm import tqdm
 
-def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, select_file_type, patient_identifier_keys, data_dict):
+def print_highlighted_warning(message):
+    box_width = 80
+    padding = 3
+    text_width = box_width - 2 * padding - 2  # 2 for the asterisks on each side
+    lines = message.split('\n')
+    max_line_width = max(len(line) for line in lines)
+    box_width = max_line_width + 2 * padding + 2  # 2 for the asterisks on each side
+    print()
+    print('*' * box_width)
+    for line in lines:
+        print('*' + ' ' * padding + line.ljust(max_line_width) + ' ' * padding + '*')
+    print('*' * box_width)
+    print()
+
+
+def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, select_file_type, patient_identifier_keys, data_dict):
     acq_label = acq.label
     acq_id = acq.id
     for f in acq.files:
@@ -38,6 +53,7 @@ def add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, select_
             # This happens if the file has not had any classifiers run on it
             file_has_info = False
 
+        data_dict['project_id'].append(project_id)
         data_dict['subject_id'].append(sub_id)
         data_dict['subject_label'].append(sub_label)
         data_dict['session_id'].append(ses_id)
@@ -65,17 +81,21 @@ to the file container in the Flywheel system.
 Output is a CSV file containing results for every DICOM file or DICOM zip archive in the project.
 The output file is named group_project_dicom_deid_report.csv.
 
-Because this iterates over all files in a project, it can take some time to retrieve each file's
-data from the server.
+By default, the script iterates over all dicom files in a project, it can take some time to retrieve each
+file's data from the server. It can optionally take a list of session IDs, which can be from any combination
+of groups and projects. If a session list is provided, the group and project arguments are only used to
+name the output, and do not need to correspond to actual group or project labels. Using a session list is
+slower, and only recommended if you are testing a small subset of sessions.
 
 What this script does:
      * Iterates over every subject, session, acquisition, file container.
      * If file is DICOM, check its metadata for the existence of common direct identifiers in
        standard DICOM fields, and also check if a deidentification method is recorded.
+     * Optionally, file types other than DICOM can be checked.
 
 What this script does not do:
-    * Check the DICOM files themselves. We trust that Flywheel's classification will capture
-      identifiers if present, and place them in the file container.
+    * Check the file contents. This script checks for metadata that is placed into the file container on Flywheel.
+      To check for identifiers in DICOM archives, use the dicom_deid_header_check.py script.
 
     * Check all possible identifiers. The script checks a selection of direct identifiers including
       PatientName, PatientID, PatientAddress, and PatientBirthDate.
@@ -100,12 +120,16 @@ optional.add_argument("-s", "--sessions", help="Text file containing a list of s
                       "Use this to check a subset of sessions in the project.", type=str, default = None)
 optional.add_argument("-t", "--file-type", help="File type to check, or 'all' to check all types", type=str, default="dicom")
 
+if len(sys.argv) == 1:
+    parser.print_usage()
+    parser.exit(status=1, message="Use -h to see full help.\n")
+
 args = parser.parse_args()
 
 fw = flywheel.Client()
 
 # First generate our "data dictionary" that will contain the values we want to track
-data_dict = {'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[], 'acquisition_id':[],
+data_dict = {'project_id': [], 'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[], 'acquisition_id':[],
              'acquisition_label':[], 'file_name':[], 'file_type':[], 'file_user':[], 'file_created':[], 'file_has_info':[],
              'file_deidentification_method':[], 'file_has_patient_identifiers':[], 'file_patient_identifiers_populated':[]}
 
@@ -126,10 +150,19 @@ group_label = args.group
 project_label = args.project
 sessions_fn = args.sessions
 
+# Print standard disclaimer
+print("\n" + '''IMPORTANT: This script cannot detect all potential sources of PII.
+Please see help (-h) for more information on its limitations.
+''')
+
 # Print out the list of patient identifiers we will check
 print("Checking for patient identifiers in the following fields:")
 for id_key in patient_identifier_keys:
     print(f"  {id_key}")
+
+print("")
+
+
 
 # Print out the list of file types we will check
 print(f"Checking files of type: {args.file_type}")
@@ -143,12 +176,14 @@ if sessions_fn is not None:
     for ses_id in tqdm(session_ids):
         ses = fw.get(ses_id)
         sub = ses.subject
+        project_id = ses.project
         sub_label = sub.label
         sub_id = sub.id
         ses_label = ses.label
         acquisitions = ses.acquisitions.iter()
         for acq in acquisitions:
-            add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, args.file_type, patient_identifier_keys, data_dict)
+            add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, args.file_type,
+                                      patient_identifier_keys, data_dict)
 else:
 
     print(f"Checking all sessions in {group_label}/{project_label}")
@@ -159,6 +194,8 @@ else:
     # Note we get a list here instead of using a generator so we can track progress
     # We use the generators at the session and acquisition levels
     subjects = project.subjects()
+
+    project_id = project.id
 
     # Loop over the subjects
     for sub in tqdm(subjects):
@@ -174,12 +211,51 @@ else:
             # Get this session's acquisitions as an iterator and loop through them
             acquisitions = ses.acquisitions.iter()
             for acq in acquisitions:
-                add_acquisition_file_info(sub_id, sub_label, ses_id, ses_label, acq, args.file_type, patient_identifier_keys, data_dict)
+                add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, args.file_type,
+                                          patient_identifier_keys, data_dict)
 
 # Convert the dict to a pandas dataframe
 df = pd.DataFrame.from_dict(data_dict)
 
-# write file
+output_file_prefix = f"{group_label}_{project_label}_{args.file_type}_file_metadata"
 
-filename = f"{group_label}_{project_label}_{args.file_type}_file_metadata_deid_report.csv"
-df.to_csv(filename,index=False, na_rep = 'NA')
+# Select all rows where the header has patient identifiers
+df_with_identifiers = df[df['file_has_patient_identifiers'] == True]
+
+# Check if any rows in df_with_identifiers have populated identifiers
+if not df_with_identifiers.empty:
+    filename = f"{output_file_prefix}_with_identifiers.csv"
+
+    if not df_with_identifiers[df_with_identifiers['file_patient_identifiers_populated'] == True].empty:
+        print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
+                                f"\nWriting a list of sessions with identifiers to:\n"
+                                f"    {filename}\n")
+    else:
+        print_highlighted_warning(f"%%% WARNING Some data may not have been de-identified correctly %%%\n\n."
+                                f"Identifier fields were found but they appear to not be populated with real information.\n"
+                                f"\nWriting a list of sessions with possible identifiers to:\n"
+                                f"    {filename}\n")
+
+    df_with_identifiers.to_csv(filename,index=False, na_rep = 'NA')
+else:
+    print("\nNo identifiers were found in checked files\n")
+
+# Find errors
+df_file_missing_info = df[df['file_has_info'] == False]
+
+if not df_file_missing_info.empty:
+    print(f"WARNING: Some files could not be checked because they have no info")
+    filename = f"{output_file_prefix}_with_missing_info.csv"
+    print(f"Writing a list of sessions that could not be checked to: {filename}\n")
+    df_file_missing_info.to_csv(filename,index=False, na_rep = 'NA')
+
+full_report_fn = f"{output_file_prefix}_deid_report.csv"
+
+print(f"Writing a list of all files tested to:\n    {full_report_fn}\n")
+
+# Sort the DataFrame so that errors and sessions with identifiers are printed first
+df_sorted = df.sort_values(by=['file_patient_identifiers_populated', 'subject_label', 'session_label'],
+                           ascending=[False, True, True])
+
+# Export to CSV
+df_sorted.to_csv(full_report_fn, index=False, na_rep='NA')

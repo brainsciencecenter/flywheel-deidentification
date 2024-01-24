@@ -5,9 +5,24 @@ import flywheel
 import os
 import pandas as pd
 import pydicom
-import re
+import sys
 
 from tqdm import tqdm
+
+def print_highlighted_warning(message):
+    box_width = 80
+    padding = 3
+    text_width = box_width - 2 * padding - 2  # 2 for the asterisks on each side
+    lines = message.split('\n')
+    max_line_width = max(len(line) for line in lines)
+    box_width = max_line_width + 2 * padding + 2  # 2 for the asterisks on each side
+    print()
+    print('*' * box_width)
+    for line in lines:
+        print('*' + ' ' * padding + line.ljust(max_line_width) + ' ' * padding + '*')
+    print('*' * box_width)
+    print()
+
 
 def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier_keys, data_dict):
 
@@ -36,6 +51,7 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
 
 
     if test_acq is None:
+        data_dict['project_id'].append(ses.project)
         data_dict['subject_id'].append(sub_id)
         data_dict['subject_label'].append(sub_label)
         data_dict['session_id'].append(ses_id)
@@ -45,7 +61,7 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
         data_dict['file_name'].append(pd.NA)
         data_dict['file_user'].append(pd.NA)
         data_dict['file_created'].append(pd.NA)
-        data_dict['header_deidentification_method'].append(pd.NA)
+        data_dict['header_deidentification_method'].append('NoSuitableDicomZipFile')
         data_dict['header_has_patient_identifiers'].append(pd.NA)
         data_dict['header_patient_identifiers_populated'].append(pd.NA)
         data_dict['session_checked'].append(False)
@@ -111,6 +127,7 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
         if os.path.exists(tmp_dcm_file):
             os.remove(tmp_dcm_file)
 
+    data_dict['project_id'].append(ses.project)
     data_dict['subject_id'].append(sub_id)
     data_dict['subject_label'].append(sub_label)
     data_dict['session_id'].append(ses_id)
@@ -135,7 +152,10 @@ Output is a CSV file containing results for every DICOM file or DICOM zip archiv
 The output file is named group_project_dicom_header_deid_report.csv.
 
 By default, the script iterates over all files in a project, it can take some time to retrieve each
-file's data from the server. It can optionally take a list of session IDs.
+file's data from the server. It can optionally take a list of session IDs, which can be from any combination
+of groups and projects. If a session list is provided, the group and project arguments are only used to
+name the output, and do not need to correspond to actual group or project labels. Using a session list is
+slower, and only recommended if you are testing a small subset of sessions.
 
 What this script does:
      * Iterates over every subject, session or a selected list of sessions
@@ -185,9 +205,10 @@ What this script does not do:
     * Check files that have not run through the Flywheel DICOM classifier. These will not have the necessary
       metadata for the script to work.
 
-    * Check non-DICOM files (eg, NIFTI). Usually these will inherit identifiers from DICOM files.
+    * Check non-DICOM files (eg, NIFTI, JSON). Usually these will inherit identifiers from DICOM files.
       While NIFTI files generally do not contain identifiers, it is possible that subject IDs could
-      be encoded in the description field.
+      be encoded in the description field. JSON files can also contain identifiers. If identifiers are
+      present in the DICOM files, any files derived from the DICOM must be checked carefully.
 
     * Check all possible identifiers. The script checks a selection of direct identifiers including
       PatientName, PatientID, PatientAddress, and PatientBirthDate.
@@ -207,17 +228,20 @@ required.add_argument("group", help="Group label", type=str)
 required.add_argument("project", help="Project label", type=str)
 
 optional = parser.add_argument_group('Optional arguments')
-optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
-optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line. This session list "
-                      "need not be from a single project / group, just use an appropriate placeholder eg 'various', when "
-                      "running the script.", type=str, default = None)
+optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
+optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line.", type=str,
+                      default=None)
+
+if len(sys.argv) == 1:
+    parser.print_usage()
+    parser.exit(status=1, message="Use -h to see full help.\n")
 
 args = parser.parse_args()
 
 fw = flywheel.Client()
 
 # First generate our "data dictionary" that will contain the values we want to track
-data_dict = {'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[],
+data_dict = {'project_id': [], 'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[],
              'acquisition_id':[], 'acquisition_label':[], 'file_name':[],'file_user':[],
              'file_created':[], 'header_deidentification_method':[],
              'header_has_patient_identifiers':[], 'header_patient_identifiers_populated':[], 'session_checked':[]}
@@ -239,10 +263,17 @@ group_label = args.group
 project_label = args.project
 sessions_fn = args.sessions
 
+# Print standard disclaimer
+print("\n" + '''IMPORTANT: This script cannot detect all potential sources of PII.
+Please see help (-h) for more information on its limitations.
+''')
+
 # Print out the list of patient identifiers we will check
 print("Checking for patient identifiers in the following fields:")
 for id_key in patient_identifier_keys:
     print(f"  {id_key}")
+
+print("")
 
 if sessions_fn is not None:
 
@@ -290,7 +321,44 @@ else:
 # Convert the dict to a pandas dataframe
 df = pd.DataFrame.from_dict(data_dict)
 
-# write file
+# Select all rows where the header has patient identifiers
+df_with_identifiers = df[df['header_has_patient_identifiers'] == True]
 
-filename = f"{group_label}_{project_label}_dicom_zip_header_deid_report.csv"
-df.to_csv(filename,index=False, na_rep = 'NA')
+# Check if any rows in df_with_identifiers have populated identifiers
+if not df_with_identifiers.empty:
+    filename = f"{group_label}_{project_label}_dicom_zip_header_sessions_with_identifiers.csv"
+
+    if not df_with_identifiers[df_with_identifiers['header_patient_identifiers_populated'] == True].empty:
+        print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
+                                f"\nWriting a list of sessions with identifiers to:\n"
+                                f"    {filename}\n")
+    else:
+        print_highlighted_warning(f"%%% WARNING Some data may not have been de-identified correctly %%%\n\n."
+                                "Identifier fields were found but they appear to not be populated with real information.\n"
+                                f"\nWriting a list of sessions with possible identifiers to:\n"
+                                f"    {filename}\n")
+
+    df_with_identifiers.to_csv(filename,index=False, na_rep = 'NA')
+else:
+    print("\nNo identifiers were found in checked sessions\n")
+
+# Find errors
+df_session_checked_errors = df[df['session_checked'] == False]
+
+if not df_session_checked_errors.empty:
+    print(f"WARNING: Some sessions could not be checked")
+    filename = f"{group_label}_{project_label}_dicom_zip_header_sessions_with_errors.csv"
+    print(f"Writing a list of sessions that could not be checked to:\n    {filename}\n")
+    df_session_checked_errors.to_csv(filename,index=False, na_rep = 'NA')
+
+full_report_fn = f"{group_label}_{project_label}_dicom_zip_header_deid_report.csv"
+
+print(f"Writing a list of all acquisitions tested to:\n    {full_report_fn}\n")
+
+# Sort the DataFrame so that errors and sessions with identifiers are printed first
+df_sorted = df.sort_values(by=['header_patient_identifiers_populated', 'subject_label', 'session_label'],
+                           ascending=[False, True, True])
+
+# Export to CSV
+df_sorted.to_csv(full_report_fn, index=False, na_rep='NA')
+
