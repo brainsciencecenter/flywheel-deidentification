@@ -1,0 +1,237 @@
+
+# Dicom-File-Format
+
+# Dicom-Meta-Information-Header
+# Used TransferSyntax: Little Endian Explicit
+(0002,0000) UL 212                                      #   4, 1 FileMetaInformationGroupLength
+(0002,0001) OB 00\01                                    #   2, 1 FileMetaInformationVersion
+(0002,0002) UI =MRImageStorage                          #  26, 1 MediaStorageSOPClassUID
+(0002,0003) UI [1.3.12.2.1107.5.2.43.66044.2022062314254310300745966] #  52, 1 MediaStorageSOPInstanceUID
+(0002,0010) UI =LittleEndianExplicit                    #  20, 1 TransferSyntaxUID
+(0002,0012) UI [1.2.276.0.7230010.3.0.3.6.5]            #  28, 1 ImplementationClassUID
+(0002,0013) SH [OFFIS_DCMTK_365]                        #  16, 1 ImplementationVersionName
+(0002,0016) AE [AWP66044]                               #   8, 1 SourceApplicationEntityTitle
+
+# Dicom-Data-Set
+# Used TransferSyntax: Little Endian Explicit
+(0008,0005) CS [ISO_IR 100]                             #  10, 1 SpecificCharacterSet
+(0008,0008) CS [ORIGINAL\PRIMARY\M\NORM\DIS3D\DIS2D]    #  36, 6 ImageType
+(0008,0012) DA [20220623]                               #   8, 1 InstanceCreationDate
+(0008,0013) TM [142545.612000]                          #  14, 1 InstanceCreationTime
+(0008,0016) UI =MRImageStorage                          #  26, 1 SOPClassUID
+(0008,0018) UI [1.3.12.2.1107.5.2.43.66044.2022062314254310300745966] #  52, 1 SOPInstanceUID
+(0008,0020) DA [20220623]                               #   8, 1 StudyDate
+(0008,0021) DA [20220623]                               #   8, 1 SeriesDate
+(0008,0022) DA [20220623]                               #   8, 1 AcquisitionDate
+(0008,0023) DA [20220623]                               #   8, 1 ContentDate
+(0008,0030) TM [141542.056000]                          #  14, 1 StudyTime
+(0008,0031) TM [142543.437000]                          #  14, 1 SeriesTime
+(0008,0032) TM [141830.287500]                          #  14, 1 AcquisitionTime
+(0008,0033) TM [142545.612000]                          #  14, 1 ContentTime
+(0008,0050) SH (no value available)                     #   0, 0 AccessionNumber
+(0008,0060) CS [MR]                                     #   2, 1 Modality
+(0008,0070) LO [SIEMENS]                                #   8, 1 Manufacturer
+(0008,0080) LO [SC3T]                                   #   4, 1 InstitutionName
+(0008,0081) ST [Curie Blvd. 422,Philadelphia,PA,US,19104] #  40, 1 InstitutionAddress
+(0008,0090) PN (no value available)                     #   0, 0 ReferringPhysicianName
+(0008,0092) ST (no value available)                     #   0, 0 ReferringPhysicianAddress
+(0008,0094) SH (no value available)                     #   0, 0 ReferringPhysicianTelephoneNumbers
+(0008,0096) SQ (Sequence with undefined length #=1)     # u/l, 1 ReferringPhysicianIdentificationSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0008,009c) PN (no value available)                     #   0, 0 ConsultingPhysicianName
+(0008,009d) SQ (Sequence with undefined length #=1)     # u/l, 1 ConsultingPhysicianIdentificationSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0008,1010) SH [AWP66044]                               #   8, 1 StationName
+(0008,1030) LO [BSC_PRISMA_DEID_TEST_PHANTOM]           #  28, 1 StudyDescription
+(0008,103e) LO [anat_T1w]                               #   8, 1 SeriesDescription
+(0008,1048) PN (no value available)                     #   0, 0 PhysiciansOfRecord
+(0008,1049) SQ (Sequence with undefined length #=1)     # u/l, 1 PhysiciansOfRecordIdentificationSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0008,1050) PN (no value available)                     #   0, 0 PerformingPhysicianName
+(0008,1052) SQ (Sequence with undefined length #=1)     # u/l, 1 PerformingPhysicianIdentificationSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0008,1060) PN (no value available)                     #   0, 0 NameOfPhysiciansReadingStudy
+(0008,1062) SQ (Sequence with undefined length #=1)     # u/l, 1 PhysiciansReadingStudyIdentificationSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0008,1070) PN [DYSON^MILES]                            #  12, 1 OperatorsName
+(0008,1080) LO (no value available)                     #   0, 0 AdmittingDiagnosesDescription
+(0008,1090) LO [Prisma]                                 #   6, 1 ManufacturerModelName
+(0008,1140) SQ (Sequence with undefined length #=3)     # u/l, 1 ReferencedImageSequence
+  (fffe,e000) na (Item with undefined length #=2)         # u/l, 1 Item
+    (0008,1150) UI =MRImageStorage                          #  26, 1 ReferencedSOPClassUID
+    (0008,1155) UI [1.3.12.2.1107.5.2.43.66044.2022062314171136614843902] #  52, 1 ReferencedSOPInstanceUID
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+  (fffe,e000) na (Item with undefined length #=2)         # u/l, 1 Item
+    (0008,1150) UI =MRImageStorage                          #  26, 1 ReferencedSOPClassUID
+    (0008,1155) UI [1.3.12.2.1107.5.2.43.66044.2022062314171136653043904] #  52, 1 ReferencedSOPInstanceUID
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+  (fffe,e000) na (Item with undefined length #=2)         # u/l, 1 Item
+    (0008,1150) UI =MRImageStorage                          #  26, 1 ReferencedSOPClassUID
+    (0008,1155) UI [1.3.12.2.1107.5.2.43.66044.2022062314171136536443898] #  52, 1 ReferencedSOPInstanceUID
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0010,0010) PN (no value available)                     #   0, 0 PatientName
+(0010,0020) LO (no value available)                     #   0, 0 PatientID
+(0010,0021) LO (no value available)                     #   0, 0 IssuerOfPatientID
+(0010,0030) DA (no value available)                     #   0, 0 PatientBirthDate
+(0010,0032) TM (no value available)                     #   0, 0 PatientBirthTime
+(0010,0033) LO (no value available)                     #   0, 0 PatientBirthDateInAlternativeCalendar
+(0010,0034) LO (no value available)                     #   0, 0 PatientDeathDateInAlternativeCalendar
+(0010,0035) CS (no value available)                     #   0, 0 PatientAlternativeCalendar
+(0010,0040) CS [M]                                      #   2, 1 PatientSex
+(0010,0050) SQ (Sequence with undefined length #=1)     # u/l, 1 PatientInsurancePlanCodeSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0010,0101) SQ (Sequence with undefined length #=1)     # u/l, 1 PatientPrimaryLanguageCodeSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0010,1000) LO (no value available)                     #   0, 0 RETIRED_OtherPatientIDs
+(0010,1001) PN (no value available)                     #   0, 0 OtherPatientNames
+(0010,1002) SQ (Sequence with undefined length #=1)     # u/l, 1 OtherPatientIDsSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0010,1005) PN (no value available)                     #   0, 0 PatientBirthName
+(0010,1010) AS [037Y]                                   #   4, 1 PatientAge
+(0010,1020) DS (no value available)                     #   0, 0 PatientSize
+(0010,1021) SQ (Sequence with undefined length #=1)     # u/l, 1 PatientSizeCodeSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0010,1030) DS [90.71848554]                            #  12, 1 PatientWeight
+(0010,1040) LO (no value available)                     #   0, 0 PatientAddress
+(0010,1050) LO (no value available)                     #   0, 0 RETIRED_InsurancePlanIdentification
+(0010,1060) PN (no value available)                     #   0, 0 PatientMotherBirthName
+(0010,1080) LO (no value available)                     #   0, 0 MilitaryRank
+(0010,1081) LO (no value available)                     #   0, 0 BranchOfService
+(0010,1090) LO (no value available)                     #   0, 0 RETIRED_MedicalRecordLocator
+(0010,1100) SQ (Sequence with undefined length #=1)     # u/l, 1 ReferencedPatientPhotoSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0010,2000) LO (no value available)                     #   0, 0 MedicalAlerts
+(0010,2110) LO (no value available)                     #   0, 0 Allergies
+(0010,2150) LO (no value available)                     #   0, 0 CountryOfResidence
+(0010,2152) LO (no value available)                     #   0, 0 RegionOfResidence
+(0010,2154) SH (no value available)                     #   0, 0 PatientTelephoneNumbers
+(0010,2155) LT (no value available)                     #   0, 0 PatientTelecomInformation
+(0010,2160) SH (no value available)                     #   0, 0 EthnicGroup
+(0010,2180) SH (no value available)                     #   0, 0 Occupation
+(0010,21a0) CS (no value available)                     #   0, 0 SmokingStatus
+(0010,21b0) LT (no value available)                     #   0, 0 AdditionalPatientHistory
+(0010,21c0) US 0                                        #   2, 1 PregnancyStatus
+(0010,21d0) DA (no value available)                     #   0, 0 LastMenstrualDate
+(0010,21f0) LO (no value available)                     #   0, 0 PatientReligiousPreference
+(0010,2203) CS (no value available)                     #   0, 0 PatientSexNeutered
+(0010,2297) PN (no value available)                     #   0, 0 ResponsiblePerson
+(0010,2298) CS (no value available)                     #   0, 0 ResponsiblePersonRole
+(0010,2299) LO (no value available)                     #   0, 0 ResponsibleOrganization
+(0010,4000) LT (no value available)                     #   0, 0 PatientComments
+(0012,0063) LO [Penn_BSC_profile_v3.0]                  #  22, 1 DeidentificationMethod
+(0018,0015) CS [BRAIN]                                  #   6, 1 BodyPartExamined
+(0018,0020) CS [GR\IR]                                  #   6, 2 ScanningSequence
+(0018,0021) CS [SK\SP\MP]                               #   8, 3 SequenceVariant
+(0018,0022) CS [IR\WE]                                  #   6, 2 ScanOptions
+(0018,0023) CS [3D]                                     #   2, 1 MRAcquisitionType
+(0018,0024) SH [tfl3d1_16ns]                            #  12, 1 SequenceName
+(0018,0025) CS [N]                                      #   2, 1 AngioFlag
+(0018,0050) DS [0.79999995231628]                       #  16, 1 SliceThickness
+(0018,0080) DS [2400]                                   #   4, 1 RepetitionTime
+(0018,0081) DS [3.19]                                   #   4, 1 EchoTime
+(0018,0082) DS [1000]                                   #   4, 1 InversionTime
+(0018,0083) DS [1]                                      #   2, 1 NumberOfAverages
+(0018,0084) DS [123.262851]                             #  10, 1 ImagingFrequency
+(0018,0085) SH [1H]                                     #   2, 1 ImagedNucleus
+(0018,0086) IS [1]                                      #   2, 1 EchoNumbers
+(0018,0087) DS [3]                                      #   2, 1 MagneticFieldStrength
+(0018,0089) IS [299]                                    #   4, 1 NumberOfPhaseEncodingSteps
+(0018,0091) IS [1]                                      #   2, 1 EchoTrainLength
+(0018,0093) DS [100]                                    #   4, 1 PercentSampling
+(0018,0094) DS [93.75]                                  #   6, 1 PercentPhaseFieldOfView
+(0018,0095) DS [220]                                    #   4, 1 PixelBandwidth
+(0018,1000) LO [66044]                                  #   6, 1 DeviceSerialNumber
+(0018,1020) LO [syngo MR E11]                           #  12, 1 SoftwareVersions
+(0018,1030) LO [anat_T1w]                               #   8, 1 ProtocolName
+(0018,1251) SH [Body]                                   #   4, 1 TransmitCoilName
+(0018,1310) US 0\320\300\0                              #   8, 4 AcquisitionMatrix
+(0018,1312) CS [ROW]                                    #   4, 1 InPlanePhaseEncodingDirection
+(0018,1314) DS [8]                                      #   2, 1 FlipAngle
+(0018,1315) CS [N]                                      #   2, 1 VariableFlipAngleFlag
+(0018,1316) DS [0.01990171333729]                       #  16, 1 SAR
+(0018,1318) DS [0]                                      #   2, 1 dBdt
+(0018,5100) CS [HFS]                                    #   4, 1 PatientPosition
+(0020,000d) UI [1.3.12.2.1107.5.2.43.66044.30000022060117100334300000273] #  56, 1 StudyInstanceUID
+(0020,000e) UI [1.3.12.2.1107.5.2.43.66044.20220623141815642144333.0.0.0] #  56, 1 SeriesInstanceUID
+(0020,0010) SH [1]                                      #   2, 1 StudyID
+(0020,0011) IS [7]                                      #   2, 1 SeriesNumber
+(0020,0012) IS [1]                                      #   2, 1 AcquisitionNumber
+(0020,0013) IS [78]                                     #   2, 1 InstanceNumber
+(0020,0032) DS [5.7411768119326\-158.84694060989\119.57541720649] #  48, 3 ImagePositionPatient
+(0020,0037) DS [-0.2481461837072\0.95464107941971\0.16457181106109\-0.002169067055... # 102, 6 ImageOrientationPatient
+(0020,0052) UI [1.3.12.2.1107.5.2.43.66044.2.20220623141542210.0.0.0] #  52, 1 FrameOfReferenceUID
+(0020,1040) LO (no value available)                     #   0, 0 PositionReferenceIndicator
+(0020,1041) DS [-28.566010464565]                       #  16, 1 SliceLocation
+(0020,4000) LT [BSC_PRISMA_DEID_TEST_PHANTOM]           #  28, 1 ImageComments
+(0028,0002) US 1                                        #   2, 1 SamplesPerPixel
+(0028,0004) CS [MONOCHROME2]                            #  12, 1 PhotometricInterpretation
+(0028,0010) US 320                                      #   2, 1 Rows
+(0028,0011) US 300                                      #   2, 1 Columns
+(0028,0030) DS [0.80000001192093\0.80000001192093]      #  34, 2 PixelSpacing
+(0028,0100) US 16                                       #   2, 1 BitsAllocated
+(0028,0101) US 12                                       #   2, 1 BitsStored
+(0028,0102) US 11                                       #   2, 1 HighBit
+(0028,0103) US 0                                        #   2, 1 PixelRepresentation
+(0028,0106) US 0                                        #   2, 1 SmallestImagePixelValue
+(0028,0107) US 4095                                     #   2, 1 LargestImagePixelValue
+(0028,1050) DS [4095]                                   #   4, 1 WindowCenter
+(0028,1051) DS [4095]                                   #   4, 1 WindowWidth
+(0028,1055) LO [Algo1]                                  #   6, 1 WindowCenterWidthExplanation
+(0029,0010) LO [SIEMENS CSA HEADER]                     #  18, 1 PrivateCreator
+(0029,0011) LO [SIEMENS MEDCOM HEADER2]                 #  22, 1 PrivateCreator
+(0029,1008) CS [IMAGE NUM 4]                            #  12, 1 CSAImageHeaderType
+(0029,1009) LO [20220623]                               #   8, 1 CSAImageHeaderVersion
+(0029,1010) OB 53\56\31\30\04\03\02\01\65\00\00\00\4d\00\00\00\45\63\68\6f\4c\69... # 11184, 1 CSAImageHeaderInfo
+(0029,1018) CS [MR]                                     #   2, 1 CSASeriesHeaderType
+(0029,1019) LO [20220623]                               #   8, 1 CSASeriesHeaderVersion
+(0029,1020) OB 53\56\31\30\04\03\02\01\4f\00\00\00\4d\00\00\00\55\73\65\64\50\61... # 137204, 1 CSASeriesHeaderInfo
+(0029,1160) LO [com]                                    #   4, 1 SeriesWorkflowStatus
+(0032,1030) LO (no value available)                     #   0, 0 RETIRED_ReasonForStudy
+(0032,1031) SQ (Sequence with undefined length #=1)     # u/l, 1 RequestingPhysicianIdentificationSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0032,1032) PN (no value available)                     #   0, 0 RequestingPhysician
+(0032,4000) LT [BSC_PRISMA_DEID_TEST_PHANTOM]           #  28, 1 RETIRED_StudyComments
+(0038,0050) LO (no value available)                     #   0, 0 SpecialNeeds
+(0038,0100) SQ (Sequence with undefined length #=1)     # u/l, 1 PertinentDocumentsSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0038,0300) LO (no value available)                     #   0, 0 CurrentPatientLocation
+(0038,0500) LO (no value available)                     #   0, 0 PatientState
+(0040,0006) PN (no value available)                     #   0, 0 ScheduledPerformingPhysicianName
+(0040,000b) SQ (Sequence with undefined length #=1)     # u/l, 1 ScheduledPerformingPhysicianIdentificationSequence
+  (fffe,e000) na (Item with undefined length #=0)         # u/l, 1 Item
+  (fffe,e00d) na (ItemDelimitationItem)                   #   0, 0 ItemDelimitationItem
+(fffe,e0dd) na (SequenceDelimitationItem)               #   0, 0 SequenceDelimitationItem
+(0040,0244) DA [20220623]                               #   8, 1 PerformedProcedureStepStartDate
+(0040,0245) TM [141542.127000]                          #  14, 1 PerformedProcedureStepStartTime
+(0040,0253) SH [MR20220623141542]                       #  16, 1 PerformedProcedureStepID
+(0040,0254) LO [BSC_PRISMA_DEID_TEST_PHANTOM]           #  28, 1 PerformedProcedureStepDescription
+(0040,0280) ST (no value available)                     #   0, 0 CommentsOnThePerformedProcedureStep
+(0040,1400) LT (no value available)                     #   0, 0 RequestedProcedureComments
+(0040,3001) LO (no value available)                     #   0, 0 ConfidentialityConstraintOnPatientDataDescription
+(4008,0114) PN (no value available)                     #   0, 0 RETIRED_PhysicianApprovingInterpretation
+(7fe0,0010) OW 0000\0000\0000\0000\0000\0000\0000\0000\0000\0000\0000\0000\0000... # 192000, 1 PixelData
