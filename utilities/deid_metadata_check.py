@@ -152,8 +152,8 @@ if len(sys.argv) == 1:
 
 args = parser.parse_args()
 
-if args.k:
-    fw = flywheel.Client(args.k)
+if args.api_key:
+    fw = flywheel.Client(args.api_key)
 else:
     fw = flywheel.Client()
 
@@ -313,7 +313,7 @@ df_sorted.to_csv(full_report_fn, index=False, na_rep='NA')
 acq_df_has_metadata = acq_df[acq_df['acquisition_has_metadata']]
 
 if not df_file_missing_info.empty:
-    print(f"WARNING: Some acquisitions contained the 'metadata' field"
+    print(f"WARNING: Some acquisitions contained the 'metadata' field")
     filename = f"{output_file_prefix}_acqs_with_metadata.csv"
     print(f"Writing a list of acquisitions with 'metadata' to: {filename}\n")
     acq_df_has_metadata.to_csv(filename, index=False, na_rep='NA')
