@@ -74,6 +74,9 @@ Potential de-identification failures may arise from:
   ZIP archive metadata, and JSON sidecars. **Headers, images and metadata from any new
   source should be checked manually.**
 
+* In some cases, metadata can be saved in a non-standard location. For example, some old
+  data in Flywheel can have a `"metadata"` field with protected information in it.
+
 
 ## Further de-identification for data sharing
 
