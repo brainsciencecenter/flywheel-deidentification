@@ -274,7 +274,7 @@ if not all_ok:
     if not acq_df_with_identifiers.empty:
         acq_filename = f"{output_file_prefix}_acquisitions_with_identifiers.csv"
 
-        if not df_with_identifiers[df_with_identifiers['acquisition_patient_identifiers_populated'] == True].empty:
+        if not acq_df_with_identifiers[acq_df_with_identifiers['acquisition_patient_identifiers_populated'] == True].empty:
             print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
                                     f"\nWriting a list of sessions with identifiers to:\n"
                                     f"    {acq_filename}\n")
