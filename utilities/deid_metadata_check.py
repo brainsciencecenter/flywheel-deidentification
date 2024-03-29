@@ -31,6 +31,7 @@ def check_for_sensitive_tags(info_dict):
     if info_dict is not None and info_dict:
         identifier_keys = [id_key for id_key in patient_identifier_keys
                            if id_key in info_dict]
+        found_fields = []
         for key in identifier_keys:
             value_string = str(info_dict[key])
             if len(value_string) > 0:
@@ -38,7 +39,8 @@ def check_for_sensitive_tags(info_dict):
                 # Check if file_info[key] contains alphanumeric characters
                 if any(char.isalnum() for char in value_string):
                     has_patient_identifiers_populated = True
-    return has_patient_identifiers, has_patient_identifiers_populated
+                    found_fields.append(key)
+    return has_patient_identifiers, has_patient_identifiers_populated, "/".join(found_fields)
 
 
 def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, select_file_type, patient_identifier_keys, data_dict):
@@ -47,7 +49,7 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
 
     # The acquisition container can have a "metadata" field storing dicom data
     acq_ = acq.reload()
-    acq_has_patient_identifiers, acq_patient_identifiers_populated = check_for_sensitive_tags(
+    acq_has_patient_identifiers, acq_patient_identifiers_populated, acq_found_fields = check_for_sensitive_tags(
         acq_.get("metadata")
     )
     acq_data_dict['project_id'].append(project_id)
@@ -60,6 +62,7 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
     acq_data_dict['acquisition_has_metadata'].append("metadata" in acq_)
     acq_data_dict['acquisition_has_patient_identifiers'].append(acq_has_patient_identifiers)
     acq_data_dict['acquisition_patient_identifiers_populated'].append(acq_patient_identifiers_populated)
+    acq_data_dict['found_fields'].append(acq_found_fields)
 
     for f in acq.files:
         if select_file_type != 'all' and f.type != select_file_type:
@@ -75,7 +78,7 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
         if not file_info:
             # This happens if the file has not had any classifiers run on it
             file_has_info = False
-        file_has_patient_identifiers, file_patient_identifiers_populated = check_for_sensitive_tags(
+        file_has_patient_identifiers, file_patient_identifiers_populated, found_fields = check_for_sensitive_tags(
             f.info
         )
         data_dict['project_id'].append(project_id)
@@ -93,6 +96,7 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
         data_dict['file_deidentification_method'].append(file_deid_method)
         data_dict['file_has_patient_identifiers'].append(file_has_patient_identifiers)
         data_dict['file_patient_identifiers_populated'].append(file_patient_identifiers_populated)
+        data_dict['found_fields'].append(found_fields)
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
@@ -160,10 +164,12 @@ else:
 # First generate our "data dictionary" that will contain the values we want to track
 data_dict = {'project_id': [], 'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[], 'acquisition_id':[],
              'acquisition_label':[], 'file_name':[], 'file_type':[], 'file_user':[], 'file_created':[], 'file_has_info':[],
-             'file_deidentification_method':[], 'file_has_patient_identifiers':[], 'file_patient_identifiers_populated':[]}
+             'file_deidentification_method':[], 'file_has_patient_identifiers':[], 'file_patient_identifiers_populated':[],
+             'found_fields': []}
 acq_data_dict = {
     'project_id': [], 'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[], 'acquisition_id':[],
-    'acquisition_label':[], 'acquisition_has_metadata':[], 'acquisition_has_patient_identifiers':[], 'acquisition_patient_identifiers_populated':[]}
+    'acquisition_label':[], 'acquisition_has_metadata':[], 'acquisition_has_patient_identifiers':[],
+    'acquisition_patient_identifiers_populated':[], 'found_fields':[]}
 
 # List of patient direct identifiers to check. If ANY of these exist for a file,
 # then set file_has_patient_identifiers = True
