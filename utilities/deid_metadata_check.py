@@ -28,6 +28,7 @@ def check_for_sensitive_tags(info_dict):
     Useful for info from file.info and acquisition.metadata."""
     has_patient_identifiers = False
     has_patient_identifiers_populated = False
+    found_fields = []
     if info_dict is not None and info_dict:
         identifier_keys = [id_key for id_key in patient_identifier_keys
                            if id_key in info_dict]
