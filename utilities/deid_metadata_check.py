@@ -7,6 +7,20 @@ import sys
 
 from tqdm import tqdm
 
+# Global list of patient direct identifiers to check. If ANY of these exist for a file or acquisition,
+# then set file_has_patient_identifiers = True
+#
+# Having identifiers is usually bad, however some studies use coded subject identifiers
+# in patient info fields. The presence of identifiers without a deidentification method indicates
+# serious trouble
+#
+patient_identifier_keys = ['AdditionalPatientHistory', 'CurrentPatientLocation', 'OtherPatientIDs',
+                           'OtherPatientIDsSequence', 'OtherPatientNames', 'PatientAddress',
+                           'PatientAlternativeCalendar', 'PatientBirthDate', 'PatientBirthDateInAlternativeCalendar',
+                           'PatientBirthName', 'PatientBirthTime', 'PatientDeathDateInAlternativeCalendar', 'PatientID',
+                           'PatientMotherBirthName', 'PatientName', 'PatientTelecomInformation', 'PatientTelephoneNumbers']
+
+
 def print_highlighted_warning(message):
     box_width = 80
     padding = 3
@@ -44,7 +58,8 @@ def check_for_sensitive_tags(info_dict):
     return has_patient_identifiers, has_patient_identifiers_populated, "/".join(found_fields)
 
 
-def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, select_file_type, patient_identifier_keys, data_dict):
+def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, select_file_type, data_dict,
+                              acq_data_dict):
     acq_label = acq.label
     acq_id = acq.id
 
@@ -122,6 +137,8 @@ What this script does:
      * If file is DICOM, check its metadata for the existence of common direct identifiers in
        standard DICOM fields, and also check if a deidentification method is recorded.
      * Optionally, file types other than DICOM can be checked.
+     * The acquisition container is also checked, on older imports this can contain a field 'metadata', which
+     can be populated with PII from the DICOM headers.
 
 What this script does not do:
     * Check the file contents. This script checks for metadata that is placed into the file container on Flywheel.
@@ -134,7 +151,7 @@ What this script does not do:
       but does not check that the de-identification actually happened to the specification of that
       method.
 
-    * Check metadata above the file level, for example it does not check if the Subject container
+    * Check metadata above the acquisition level, for example it does not check if the Subject container
       contains PII. Often these will only be populated through DICOM import.
 
     * Check any private tags or other custom metadata.
@@ -172,18 +189,6 @@ acq_data_dict = {
     'acquisition_label':[], 'acquisition_has_metadata':[], 'acquisition_has_patient_identifiers':[],
     'acquisition_patient_identifiers_populated':[], 'found_fields':[]}
 
-# List of patient direct identifiers to check. If ANY of these exist for a file,
-# then set file_has_patient_identifiers = True
-#
-# Having identifiers is usually bad, however some studies use coded subject identifiers
-# in patient info fields. The presence of identifiers without a deidentification method indicates
-# serious trouble
-#
-patient_identifier_keys = ['AdditionalPatientHistory', 'CurrentPatientLocation', 'OtherPatientIDs',
-                           'OtherPatientIDsSequence', 'OtherPatientNames', 'PatientAddress',
-                           'PatientAlternativeCalendar', 'PatientBirthDate', 'PatientBirthDateInAlternativeCalendar',
-                           'PatientBirthName', 'PatientBirthTime', 'PatientDeathDateInAlternativeCalendar', 'PatientID',
-                           'PatientMotherBirthName', 'PatientName', 'PatientTelecomInformation', 'PatientTelephoneNumbers']
 
 group_label = args.group
 project_label = args.project
@@ -220,7 +225,7 @@ if sessions_fn is not None:
         acquisitions = ses.acquisitions.iter()
         for acq in acquisitions:
             add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, args.file_type,
-                                      patient_identifier_keys, data_dict)
+                                      data_dict, acq_data_dict)
 else:
 
     print(f"Checking all sessions in {group_label}/{project_label}")
@@ -249,13 +254,13 @@ else:
             acquisitions = ses.acquisitions.iter()
             for acq in acquisitions:
                 add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, args.file_type,
-                                          patient_identifier_keys, data_dict)
+                                          data_dict, acq_data_dict)
 
 # Convert the dict to a pandas dataframe
 df = pd.DataFrame.from_dict(data_dict)
 acq_df = pd.DataFrame.from_dict(acq_data_dict)
 
-output_file_prefix = f"{group_label}_{project_label}_{args.file_type}_file_metadata"
+output_file_prefix = f"{group_label}_{project_label}"
 
 # Select all rows where the header has patient identifiers
 df_with_identifiers = df[df['file_has_patient_identifiers'] == True]
@@ -265,7 +270,7 @@ acq_df_with_identifiers = acq_df[acq_df['acquisition_has_patient_identifiers'] =
 all_ok = df_with_identifiers.empty and acq_df_with_identifiers.empty
 if not all_ok:
     if not df_with_identifiers.empty:
-        filename = f"{output_file_prefix}_with_identifiers.csv"
+        filename = f"{output_file_prefix}_{args.file_type}_file_metadata_with_identifiers.csv"
 
         if not df_with_identifiers[df_with_identifiers['file_patient_identifiers_populated'] == True].empty:
             print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
@@ -279,7 +284,7 @@ if not all_ok:
 
         df_with_identifiers.to_csv(filename,index=False, na_rep = 'NA')
     if not acq_df_with_identifiers.empty:
-        acq_filename = f"{output_file_prefix}_acquisitions_with_identifiers.csv"
+        acq_filename = f"{output_file_prefix}_acquisition_metadata_with_identifiers.csv"
 
         if not acq_df_with_identifiers[acq_df_with_identifiers['acquisition_patient_identifiers_populated'] == True].empty:
             print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
@@ -304,7 +309,7 @@ if not df_file_missing_info.empty:
     print(f"Writing a list of sessions that could not be checked to: {filename}\n")
     df_file_missing_info.to_csv(filename,index=False, na_rep = 'NA')
 
-full_report_fn = f"{output_file_prefix}_deid_report.csv"
+full_report_fn = f"{output_file_prefix}_{args.file_type}_file_metadata_deid_report.csv"
 
 print(f"Writing a list of all files tested to:\n    {full_report_fn}\n")
 
@@ -320,8 +325,8 @@ df_sorted.to_csv(full_report_fn, index=False, na_rep='NA')
 acq_df_has_metadata = acq_df[acq_df['acquisition_has_metadata']]
 
 if not acq_df_has_metadata.empty:
-    print(f"WARNING: Some acquisitions contained the 'metadata' field")
-    filename = f"{output_file_prefix}_acqs_with_metadata.csv"
+    print(f"WARNING: Some acquisitions contained the 'metadata' attribute")
+    filename = f"{output_file_prefix}_acquisitions_with_metadata_attribute.csv"
     print(f"Writing a list of acquisitions with 'metadata' to: {filename}\n")
     acq_df_has_metadata.to_csv(filename, index=False, na_rep='NA')
 

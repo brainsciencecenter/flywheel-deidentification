@@ -13,10 +13,10 @@ file.
 **Do not use older versions of the code with `fw import dicom` to import data to
 Flywheel**.
 
-If uploading data manually, or from a new source, test and verify the de-identification.
-First use `fw deid test` (see the [profile
-page](profiles/PennBrainScienceCenter/README.md) for details).
-Then upload a single session and check carefully. Notify the admins of any problems.
+If uploading data manually, or from a new source, you **must** test and verify the
+de-identification. First use `fw deid test` (see the [profile
+page](profiles/PennBrainScienceCenter/README.md) for details). Then upload a single
+session and check carefully. Notify the admins of any problems.
 
 If you require a different de-identification profile than the site profile, please contact
 the site admin Gaylord Holder to discuss options.
@@ -36,6 +36,10 @@ protocol.
 Data imported via the web "DICOM Upload" interface also has this profile applied, unless a
 project-level profile is present. Contact the site admin if you need customized
 de-identification.
+
+**Update 2024-03**: There is a known bug affecting Linux browsers, upload only from Mac or
+Windows. Use the latest Google Chrome. As always, when updating from a new data source or
+machine, verify results.
 
 Data ingested via the `fw ingest dicom` command also applies the site profile.
 
