@@ -22,9 +22,49 @@ def print_highlighted_warning(message):
     print()
 
 
+def check_for_sensitive_tags(info_dict):
+    """Check for sensitive keys in an bids-ish info dict.
+
+    Useful for info from file.info and acquisition.metadata."""
+    has_patient_identifiers = False
+    has_patient_identifiers_populated = False
+    found_fields = []
+    if info_dict is not None and info_dict:
+        identifier_keys = [id_key for id_key in patient_identifier_keys
+                           if id_key in info_dict]
+        found_fields = []
+        for key in identifier_keys:
+            value_string = str(info_dict[key])
+            if len(value_string) > 0:
+                has_patient_identifiers = True
+                # Check if file_info[key] contains alphanumeric characters
+                if any(char.isalnum() for char in value_string):
+                    has_patient_identifiers_populated = True
+                    found_fields.append(key)
+    return has_patient_identifiers, has_patient_identifiers_populated, "/".join(found_fields)
+
+
 def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, select_file_type, patient_identifier_keys, data_dict):
     acq_label = acq.label
     acq_id = acq.id
+
+    # The acquisition container can have a "metadata" field storing dicom data
+    acq_ = acq.reload()
+    acq_has_patient_identifiers, acq_patient_identifiers_populated, acq_found_fields = check_for_sensitive_tags(
+        acq_.get("metadata")
+    )
+    acq_data_dict['project_id'].append(project_id)
+    acq_data_dict['subject_id'].append(sub_id)
+    acq_data_dict['subject_label'].append(sub_label)
+    acq_data_dict['session_id'].append(ses_id)
+    acq_data_dict['session_label'].append(ses_label)
+    acq_data_dict['acquisition_id'].append(acq_id)
+    acq_data_dict['acquisition_label'].append(acq_label)
+    acq_data_dict['acquisition_has_metadata'].append("metadata" in acq_)
+    acq_data_dict['acquisition_has_patient_identifiers'].append(acq_has_patient_identifiers)
+    acq_data_dict['acquisition_patient_identifiers_populated'].append(acq_patient_identifiers_populated)
+    acq_data_dict['found_fields'].append(acq_found_fields)
+
     for f in acq.files:
         if select_file_type != 'all' and f.type != select_file_type:
             continue
@@ -33,26 +73,15 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
         file_user = f.origin['id']
         file_created = str(f.created.date())
         file_info = f.info
-        file_deid_method = pd.NA
         file_type = f.type
-        file_has_patient_identifiers = False
-        file_patient_identifiers_populated = False
+        file_deid_method = f.info.get('DeidentificationMethod')
         file_has_info = True
-        if (file_info):
-            if ('DeidentificationMethod' in file_info):
-                file_deid_method = file_info['DeidentificationMethod']
-            identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in file_info]
-            for key in identifier_keys:
-                value_string = str(file_info[key])
-                if len(value_string) > 0:
-                    file_has_patient_identifiers = True
-                    # Check if file_info[key] contains alphanumeric characters
-                    if any(char.isalnum() for char in value_string):
-                        file_patient_identifiers_populated = True
-        else:
+        if not file_info:
             # This happens if the file has not had any classifiers run on it
             file_has_info = False
-
+        file_has_patient_identifiers, file_patient_identifiers_populated, found_fields = check_for_sensitive_tags(
+            f.info
+        )
         data_dict['project_id'].append(project_id)
         data_dict['subject_id'].append(sub_id)
         data_dict['subject_label'].append(sub_label)
@@ -68,6 +97,7 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
         data_dict['file_deidentification_method'].append(file_deid_method)
         data_dict['file_has_patient_identifiers'].append(file_has_patient_identifiers)
         data_dict['file_patient_identifiers_populated'].append(file_patient_identifiers_populated)
+        data_dict['found_fields'].append(found_fields)
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
@@ -119,6 +149,7 @@ optional.add_argument("-h", "--help", action="help", help="show this help messag
 optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line. " \
                       "Use this to check a subset of sessions in the project.", type=str, default = None)
 optional.add_argument("-t", "--file-type", help="File type to check, or 'all' to check all types", type=str, default="dicom")
+optional.add_argument("-k", "--api-key", help="flywheel api token. needed for fw-beta", type=str)
 
 if len(sys.argv) == 1:
     parser.print_usage()
@@ -126,12 +157,20 @@ if len(sys.argv) == 1:
 
 args = parser.parse_args()
 
-fw = flywheel.Client()
+if args.api_key:
+    fw = flywheel.Client(args.api_key)
+else:
+    fw = flywheel.Client()
 
 # First generate our "data dictionary" that will contain the values we want to track
 data_dict = {'project_id': [], 'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[], 'acquisition_id':[],
              'acquisition_label':[], 'file_name':[], 'file_type':[], 'file_user':[], 'file_created':[], 'file_has_info':[],
-             'file_deidentification_method':[], 'file_has_patient_identifiers':[], 'file_patient_identifiers_populated':[]}
+             'file_deidentification_method':[], 'file_has_patient_identifiers':[], 'file_patient_identifiers_populated':[],
+             'found_fields': []}
+acq_data_dict = {
+    'project_id': [], 'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[], 'acquisition_id':[],
+    'acquisition_label':[], 'acquisition_has_metadata':[], 'acquisition_has_patient_identifiers':[],
+    'acquisition_patient_identifiers_populated':[], 'found_fields':[]}
 
 # List of patient direct identifiers to check. If ANY of these exist for a file,
 # then set file_has_patient_identifiers = True
@@ -161,8 +200,6 @@ for id_key in patient_identifier_keys:
     print(f"  {id_key}")
 
 print("")
-
-
 
 # Print out the list of file types we will check
 print(f"Checking files of type: {args.file_type}")
@@ -216,27 +253,45 @@ else:
 
 # Convert the dict to a pandas dataframe
 df = pd.DataFrame.from_dict(data_dict)
+acq_df = pd.DataFrame.from_dict(acq_data_dict)
 
 output_file_prefix = f"{group_label}_{project_label}_{args.file_type}_file_metadata"
 
 # Select all rows where the header has patient identifiers
 df_with_identifiers = df[df['file_has_patient_identifiers'] == True]
+acq_df_with_identifiers = acq_df[acq_df['acquisition_has_patient_identifiers'] == True]
 
 # Check if any rows in df_with_identifiers have populated identifiers
-if not df_with_identifiers.empty:
-    filename = f"{output_file_prefix}_with_identifiers.csv"
+all_ok = df_with_identifiers.empty and acq_df_with_identifiers.empty
+if not all_ok:
+    if not df_with_identifiers.empty:
+        filename = f"{output_file_prefix}_with_identifiers.csv"
 
-    if not df_with_identifiers[df_with_identifiers['file_patient_identifiers_populated'] == True].empty:
-        print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
-                                f"\nWriting a list of sessions with identifiers to:\n"
-                                f"    {filename}\n")
-    else:
-        print_highlighted_warning(f"%%% WARNING Some data may not have been de-identified correctly %%%\n\n."
-                                f"Identifier fields were found but they appear to not be populated with real information.\n"
-                                f"\nWriting a list of sessions with possible identifiers to:\n"
-                                f"    {filename}\n")
+        if not df_with_identifiers[df_with_identifiers['file_patient_identifiers_populated'] == True].empty:
+            print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
+                                    f"\nWriting a list of sessions with identifiers to:\n"
+                                    f"    {filename}\n")
+        else:
+            print_highlighted_warning(f"%%% WARNING Some data may not have been de-identified correctly %%%\n\n."
+                                    f"Identifier fields were found but they appear to not be populated with real information.\n"
+                                    f"\nWriting a list of sessions with possible identifiers to:\n"
+                                    f"    {filename}\n")
 
-    df_with_identifiers.to_csv(filename,index=False, na_rep = 'NA')
+        df_with_identifiers.to_csv(filename,index=False, na_rep = 'NA')
+    if not acq_df_with_identifiers.empty:
+        acq_filename = f"{output_file_prefix}_acquisitions_with_identifiers.csv"
+
+        if not acq_df_with_identifiers[acq_df_with_identifiers['acquisition_patient_identifiers_populated'] == True].empty:
+            print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
+                                    f"\nWriting a list of sessions with identifiers to:\n"
+                                    f"    {acq_filename}\n")
+        else:
+            print_highlighted_warning(f"%%% WARNING Some data may not have been de-identified correctly %%%\n\n."
+                                    f"Identifier fields were found but they appear to not be populated with real information.\n"
+                                    f"\nWriting a list of sessions with possible identifiers to:\n"
+                                    f"    {acq_filename}\n")
+
+        acq_df_with_identifiers.to_csv(acq_filename,index=False, na_rep = 'NA')
 else:
     print("\nNo identifiers were found in checked files\n")
 
@@ -259,3 +314,24 @@ df_sorted = df.sort_values(by=['file_patient_identifiers_populated', 'subject_la
 
 # Export to CSV
 df_sorted.to_csv(full_report_fn, index=False, na_rep='NA')
+
+
+# Find sessions with the mysterious "metadata" field present
+acq_df_has_metadata = acq_df[acq_df['acquisition_has_metadata']]
+
+if not acq_df_has_metadata.empty:
+    print(f"WARNING: Some acquisitions contained the 'metadata' field")
+    filename = f"{output_file_prefix}_acqs_with_metadata.csv"
+    print(f"Writing a list of acquisitions with 'metadata' to: {filename}\n")
+    acq_df_has_metadata.to_csv(filename, index=False, na_rep='NA')
+
+full_report_fn = f"{output_file_prefix}_acquisition_metadata_report.csv"
+
+print(f"Writing a list of all acquisitions tested to:\n    {full_report_fn}\n")
+
+# Sort the DataFrame so that errors and sessions with identifiers are printed first
+acq_df_sorted = acq_df.sort_values(by=['acquisition_patient_identifiers_populated', 'subject_label', 'session_label'],
+                           ascending=[False, True, True])
+
+# Export to CSV
+acq_df_sorted.to_csv(full_report_fn, index=False, na_rep='NA')
