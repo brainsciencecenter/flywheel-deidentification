@@ -75,7 +75,7 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
     acq_data_dict['session_label'].append(ses_label)
     acq_data_dict['acquisition_id'].append(acq_id)
     acq_data_dict['acquisition_label'].append(acq_label)
-    acq_data_dict['acquisition_has_metadata'].append("metadata" in acq_)
+    acq_data_dict['acquisition_has_metadata'].append(acq.metadata is not None)
     acq_data_dict['acquisition_has_patient_identifiers'].append(acq_has_patient_identifiers)
     acq_data_dict['acquisition_patient_identifiers_populated'].append(acq_patient_identifiers_populated)
     acq_data_dict['found_fields'].append(acq_found_fields)
