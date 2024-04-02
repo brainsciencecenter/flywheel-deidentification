@@ -55,7 +55,16 @@ def check_for_sensitive_tags(info_dict):
                 if any(char.isalnum() for char in value_string):
                     has_patient_identifiers_populated = True
                     found_fields.append(key)
-    return has_patient_identifiers, has_patient_identifiers_populated, "/".join(found_fields)
+
+    found_values = "NA"
+
+    if has_patient_identifiers_populated:
+        if output_found_values:
+            found_values = "/".join([info_dict[key] for key in found_fields])
+        else:
+            found_values = "REDACTED"
+
+    return has_patient_identifiers, has_patient_identifiers_populated, "/".join(found_fields), found_values
 
 
 def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, select_file_type, data_dict,
@@ -65,9 +74,8 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
 
     # The acquisition container can have a "metadata" field storing dicom data
     acq_ = acq.reload()
-    acq_has_patient_identifiers, acq_patient_identifiers_populated, acq_found_fields = check_for_sensitive_tags(
-        acq_.get("metadata")
-    )
+    acq_has_patient_identifiers, acq_patient_identifiers_populated, acq_found_fields, acq_found_values = \
+        check_for_sensitive_tags(acq_.get("metadata"))
     acq_data_dict['project_id'].append(project_id)
     acq_data_dict['subject_id'].append(sub_id)
     acq_data_dict['subject_label'].append(sub_label)
@@ -79,6 +87,7 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
     acq_data_dict['acquisition_has_patient_identifiers'].append(acq_has_patient_identifiers)
     acq_data_dict['acquisition_patient_identifiers_populated'].append(acq_patient_identifiers_populated)
     acq_data_dict['found_fields'].append(acq_found_fields)
+    acq_data_dict['found_values'].append(acq_found_values)
 
     for f in acq.files:
         if select_file_type != 'all' and f.type != select_file_type:
@@ -94,9 +103,8 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
         if not file_info:
             # This happens if the file has not had any classifiers run on it
             file_has_info = False
-        file_has_patient_identifiers, file_patient_identifiers_populated, found_fields = check_for_sensitive_tags(
-            f.info
-        )
+        file_has_patient_identifiers, file_patient_identifiers_populated, found_fields, found_values = \
+            check_for_sensitive_tags(f.info)
         data_dict['project_id'].append(project_id)
         data_dict['subject_id'].append(sub_id)
         data_dict['subject_label'].append(sub_label)
@@ -113,6 +121,7 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
         data_dict['file_has_patient_identifiers'].append(file_has_patient_identifiers)
         data_dict['file_patient_identifiers_populated'].append(file_patient_identifiers_populated)
         data_dict['found_fields'].append(found_fields)
+        data_dict['found_values'].append(found_values)
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
@@ -163,16 +172,21 @@ required.add_argument("project", help="Project label", type=str)
 
 optional = parser.add_argument_group('Optional arguments')
 optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
-optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line. " \
+optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line. "
                       "Use this to check a subset of sessions in the project.", type=str, default = None)
 optional.add_argument("-t", "--file-type", help="File type to check, or 'all' to check all types", type=str, default="dicom")
 optional.add_argument("-k", "--api-key", help="flywheel api token. needed for fw-beta", type=str)
+optional.add_argument("--output-identifier-values", help="Output the values of found identifiers in the reports. This is off "
+                      "by default, only the names of the fields are reported. If you use this option, you must store the "
+                      "outputs securely.", dest='output_found_values', action="store_true")
 
 if len(sys.argv) == 1:
     parser.print_usage()
     parser.exit(status=1, message="Use -h to see full help.\n")
 
 args = parser.parse_args()
+
+output_found_values = args.output_found_values
 
 if args.api_key:
     fw = flywheel.Client(args.api_key)
@@ -183,11 +197,11 @@ else:
 data_dict = {'project_id': [], 'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[], 'acquisition_id':[],
              'acquisition_label':[], 'file_name':[], 'file_type':[], 'file_user':[], 'file_created':[], 'file_has_info':[],
              'file_deidentification_method':[], 'file_has_patient_identifiers':[], 'file_patient_identifiers_populated':[],
-             'found_fields': []}
+             'found_fields': [], 'found_values': []}
 acq_data_dict = {
     'project_id': [], 'subject_id':[], 'subject_label':[], 'session_id':[], 'session_label':[], 'acquisition_id':[],
     'acquisition_label':[], 'acquisition_has_metadata':[], 'acquisition_has_patient_identifiers':[],
-    'acquisition_patient_identifiers_populated':[], 'found_fields':[]}
+    'acquisition_patient_identifiers_populated':[], 'found_fields':[], 'found_values': []}
 
 
 group_label = args.group
@@ -198,6 +212,10 @@ sessions_fn = args.sessions
 print("\n" + '''IMPORTANT: This script cannot detect all potential sources of PII.
 Please see help (-h) for more information on its limitations.
 ''')
+
+if output_found_values:
+    print("WARNING: outputing identifier values in the report. This is useful to rule out false positives, but may expose "
+          "PII. Treat all output as sensitive data until confirmed otherwise.\n")
 
 # Print out the list of patient identifiers we will check
 print("Checking for patient identifiers in the following fields:")
@@ -273,9 +291,14 @@ if not all_ok:
         filename = f"{output_file_prefix}_{args.file_type}_file_metadata_with_identifiers.csv"
 
         if not df_with_identifiers[df_with_identifiers['file_patient_identifiers_populated'] == True].empty:
-            print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
-                                    f"\nWriting a list of sessions with identifiers to:\n"
-                                    f"    {filename}\n")
+            print_highlighted_warning(f"%%% ALERT Identifiers were found in file metadata! %%%"
+                                      f"\n\nVerify immediately and notify site admin."
+                                      f"\nWriting a list of files with identifiers to:\n"
+                                      f"    {filename}\n")
+            if output_found_values:
+                print_highlighted_warning(f"%%%ALERT User opted to include identifier values in output.%%%\n"
+                      "Treat all output as sensitive data until confirmed otherwise.\n"
+                      "Do not email or store outside of approved systems\n")
         else:
             print_highlighted_warning(f"%%% WARNING Some data may not have been de-identified correctly %%%\n\n."
                                     f"Identifier fields were found but they appear to not be populated with real information.\n"
@@ -287,9 +310,14 @@ if not all_ok:
         acq_filename = f"{output_file_prefix}_acquisition_metadata_with_identifiers.csv"
 
         if not acq_df_with_identifiers[acq_df_with_identifiers['acquisition_patient_identifiers_populated'] == True].empty:
-            print_highlighted_warning(f"%%% ALERT Identifiers were found! %%%\n\nVerify immediately and notify site admin."
-                                    f"\nWriting a list of sessions with identifiers to:\n"
-                                    f"    {acq_filename}\n")
+            print_highlighted_warning(f"%%% ALERT Identifiers were found in acquisition metadata! %%%"
+                                      "\n\nVerify immediately and notify site admin."
+                                      f"\nWriting a list of acquisitions with identifiers to:\n"
+                                      f"    {acq_filename}\n")
+            if output_found_values:
+                print_highlighted_warning(f"%%% ALERT User opted to include identifier values in output. %%%\n"
+                      "Treat all output as sensitive data until confirmed otherwise.\n"
+                      "Do not email or store outside of approved systems\n")
         else:
             print_highlighted_warning(f"%%% WARNING Some data may not have been de-identified correctly %%%\n\n."
                                     f"Identifier fields were found but they appear to not be populated with real information.\n"
