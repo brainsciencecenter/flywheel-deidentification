@@ -89,6 +89,9 @@ def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, 
     acq_data_dict['found_fields'].append(acq_found_fields)
     acq_data_dict['found_values'].append(acq_found_values)
 
+    if select_file_type == 'none':
+        return
+
     for f in acq.files:
         if select_file_type != 'all' and f.type != select_file_type:
             continue
@@ -174,7 +177,8 @@ optional = parser.add_argument_group('Optional arguments')
 optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
 optional.add_argument("-s", "--sessions", help="Text file containing a list of session IDs, one per line. "
                       "Use this to check a subset of sessions in the project.", type=str, default = None)
-optional.add_argument("-t", "--file-type", help="File type to check, or 'all' to check all types", type=str, default="dicom")
+optional.add_argument("-t", "--file-type", help="File type to check, or 'all' to check all types, or 'none' to check "
+                      "acquisition metadata only", type=str, default="dicom")
 optional.add_argument("-k", "--api-key", help="flywheel api token. needed for fw-beta", type=str)
 optional.add_argument("--output-identifier-values", help="Output the values of found identifiers in the reports. This is off "
                       "by default, only the names of the fields are reported. If you use this option, you must store the "
@@ -291,12 +295,12 @@ if not all_ok:
         filename = f"{output_file_prefix}_{args.file_type}_file_metadata_with_identifiers.csv"
 
         if not df_with_identifiers[df_with_identifiers['file_patient_identifiers_populated'] == True].empty:
-            print_highlighted_warning(f"%%% ALERT Identifiers were found in file metadata! %%%"
-                                      f"\n\nVerify immediately and notify site admin."
+            print_highlighted_warning(f"%%% ALERT Identifiers were found in file metadata! %%%\n\n"
+                                      f"Verify immediately and notify site admin."
                                       f"\nWriting a list of files with identifiers to:\n"
                                       f"    {filename}\n")
             if output_found_values:
-                print_highlighted_warning(f"%%%ALERT User opted to include identifier values in output.%%%\n"
+                print_highlighted_warning(f"%%%ALERT User opted to include identifier values in output.%%%\nn\n"
                       "Treat all output as sensitive data until confirmed otherwise.\n"
                       "Do not email or store outside of approved systems\n")
         else:
@@ -310,12 +314,12 @@ if not all_ok:
         acq_filename = f"{output_file_prefix}_acquisition_metadata_with_identifiers.csv"
 
         if not acq_df_with_identifiers[acq_df_with_identifiers['acquisition_patient_identifiers_populated'] == True].empty:
-            print_highlighted_warning(f"%%% ALERT Identifiers were found in acquisition metadata! %%%"
-                                      "\n\nVerify immediately and notify site admin."
+            print_highlighted_warning(f"%%% ALERT Identifiers were found in acquisition metadata! %%%\n\n"
+                                      "Verify immediately and notify site admin."
                                       f"\nWriting a list of acquisitions with identifiers to:\n"
                                       f"    {acq_filename}\n")
             if output_found_values:
-                print_highlighted_warning(f"%%% ALERT User opted to include identifier values in output. %%%\n"
+                print_highlighted_warning(f"%%% ALERT User opted to include identifier values in output. %%%\n\n"
                       "Treat all output as sensitive data until confirmed otherwise.\n"
                       "Do not email or store outside of approved systems\n")
         else:
