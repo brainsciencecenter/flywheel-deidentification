@@ -60,7 +60,7 @@ def check_for_sensitive_tags(info_dict):
 
     if has_patient_identifiers_populated:
         if output_found_values:
-            found_values = "/".join([info_dict[key] for key in found_fields])
+            found_values = "/".join([str(info_dict[key]) for key in found_fields])
         else:
             found_values = "REDACTED"
 
