@@ -114,10 +114,6 @@ dicom:
     replace-with: ''
   - name: PatientSexNeutered
     replace-with: ''
-  - name: PatientSize
-    replace-with: ''
-  - name: PatientSizeCodeSequence
-    replace-with: ''
   - name: PatientState
     replace-with: ''
   - name: PatientTelecomInformation
@@ -139,7 +135,7 @@ dicom:
   - name: PhysiciansReadingStudyIdentificationSequence
     replace-with: ''
   - name: PregnancyStatus
-    replace-with: ''
+    replace-with: 4
   - name: ReasonForStudy
     replace-with: ''
   - name: ReferencedPatientPhotoSequence
