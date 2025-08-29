@@ -40,31 +40,59 @@ def check_for_sensitive_tags(info_dict):
     """Check for sensitive keys in an bids-ish info dict.
 
     Useful for info from file.info and acquisition.metadata."""
-    has_patient_identifiers = False
-    has_patient_identifiers_populated = False
-    found_fields = []
-    if info_dict is not None and info_dict:
-        identifier_keys = [id_key for id_key in patient_identifier_keys
-                           if id_key in info_dict]
+
+    def check_identifiers_in_dict(dcm_dict, patient_identifier_keys):
+        has_patient_identifiers = False
+        has_patient_identifiers_populated = False
+        found_fields = []
+        found_values = []
+        identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in dcm_dict]
         found_fields = []
         for key in identifier_keys:
-            value_string = str(info_dict[key])
+            value_string = str(dcm_dict[key])
             if len(value_string) > 0:
                 has_patient_identifiers = True
                 # Check if file_info[key] contains alphanumeric characters
                 if any(char.isalnum() for char in value_string):
                     has_patient_identifiers_populated = True
                     found_fields.append(key)
-
-    found_values = "NA"
-
-    if has_patient_identifiers_populated:
-        if output_found_values:
-            found_values = "/".join([str(info_dict[key]) for key in found_fields])
+        if output_found_values: # global variable in script
+            found_values = [str(dcm_dict[key]) for key in found_fields]
         else:
-            found_values = "REDACTED"
+            if found_fields:
+                found_values = ["REDACTED"]
+            else:
+                found_values = ["NA"]
 
-    return has_patient_identifiers, has_patient_identifiers_populated, "/".join(found_fields), found_values
+        return {'has_patient_identifiers': has_patient_identifiers,
+                'has_patient_identifiers_populated': has_patient_identifiers_populated,
+                'found_fields': found_fields,
+                'found_values': found_values}
+
+    if info_dict is not None and info_dict:
+        top_level_results = check_identifiers_in_dict(info_dict, patient_identifier_keys)
+        modified_results = {'has_patient_identifiers': False,
+                            'has_patient_identifiers_populated': False,
+                            'found_fields': [],
+                            'found_values': []}
+        # Also check the array OriginalAttributesSequence
+        if 'OriginalAttributesSequence' in info_dict:
+            orig_attr = info_dict['OriginalAttributesSequence']
+            if 'ModifiedAttributesSequence' in orig_attr:
+                mod_attr = orig_attr['ModifiedAttributesSequence']
+                modified_results = check_identifiers_in_dict(mod_attr, patient_identifier_keys)
+
+        has_patient_identifiers = top_level_results['has_patient_identifiers'] or modified_results['has_patient_identifiers']
+        has_patient_identifiers_populated = top_level_results['has_patient_identifiers_populated'] or \
+                                        modified_results['has_patient_identifiers_populated']
+
+        all_found_fields = top_level_results['found_fields'] + modified_results['found_fields']
+        all_found_values = top_level_results['found_values'] + modified_results['found_values']
+
+        return (has_patient_identifiers, has_patient_identifiers_populated, "/".join(all_found_fields),
+                     "/".join(all_found_values))
+    else:
+        return (False, False, "", "")
 
 
 def add_acquisition_file_info(project_id, sub_id, sub_label, ses_id, ses_label, acq, select_file_type, data_dict,
@@ -179,7 +207,7 @@ optional.add_argument("-s", "--sessions", help="Text file containing a list of s
                       "Use this to check a subset of sessions in the project.", type=str, default = None)
 optional.add_argument("-t", "--file-type", help="File type to check, or 'all' to check all types, or 'none' to check "
                       "acquisition metadata only", type=str, default="dicom")
-optional.add_argument("-k", "--api-key", help="flywheel api token. needed for fw-beta", type=str)
+optional.add_argument("-k", "--api-key", help="flywheel api key (needed if not logged in)", type=str)
 optional.add_argument("--output-identifier-values", help="Output the values of found identifiers in the reports. This is off "
                       "by default, only the names of the fields are reported. If you use this option, you must store the "
                       "outputs securely.", dest='output_found_values', action="store_true")

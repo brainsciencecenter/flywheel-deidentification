@@ -27,30 +27,56 @@ def print_highlighted_warning(message):
 def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier_keys, data_dict):
 
     test_acq = None
-    # This is the dicom archive file we will extract a dcm file from
+    # This is the dicom archive file we will extract a dcm file from, or a single dcm file
     test_file = None
-    # Find the first acquisition that has a dicom zip file
-    # ignore Phoenix zip files
+    # Find the first acquisition that has a dicom zip file or a .dcm file
+
+    # The actual dcm file we will write to disk temporarily
+    # This is extracted / downloaded from the test_file object
+    tmp_dcm_file = 'deid_header_check_data.dcm'
+
+    if os.path.exists(tmp_dcm_file):
+        raise RuntimeError(f"Temporary file {tmp_dcm_file} exists, something went wrong.")
+
     for acq in ses.acquisitions.iter():
         if acq.label.lower().startswith('phoenix'):
             continue
+        if os.path.exists(tmp_dcm_file):
+            break
         for f in acq.files:
             if (f.type == 'dicom'):
-                # Should be able to use f.zip_member_count, but this sometimes None
-                # even when the zip file is not empty
-                if (f.name.lower().endswith('.zip')) and f.size > 512:
-                    try:
-                        f = f.reload()
-                        image_type = f.info['ImageType']
-                        if 'PRIMARY' in [ t.upper() for t in image_type ]:
-                            test_acq = acq
-                            test_file = f
+                try:
+                    f = f.reload()
+                    image_type = f.info['ImageType']
+                    # Only look at primary images. Some data had derived images from PACS that WERE de-identified
+                    # even though the primary images were not. Of course it's possible that the reverse could happen
+                    # but the only way to be sure would be to check every acquisition, which results in API timeouts
+                    if 'PRIMARY' in [ t.upper() for t in image_type ]:
+                        # Should be able to use f.zip_member_count, but this sometimes None
+                        # even when the zip file is not empty
+                        if (f.name.lower().endswith('.zip')) and f.size > 512:
+                            try:
+                                test_acq = acq
+                                test_file = f
+                                fw_dcm = test_file.get_zip_info().members[0]
+                                test_file.download_zip_member(fw_dcm.path, tmp_dcm_file)
+                            except Exception as e:
+                                print(f"Error processing {sub_label}/{ses_label}/{acq_label}/{file_name}")
+                                print(f"Cannot download dicom file from zip archive: {e}")
                             break
-                    except KeyError:
-                        pass
+                        elif f.name.lower().endswith('.dcm') and f.size > 512:
+                            try:
+                                test_acq = acq
+                                test_file = f
+                                acq.download_file(test_file.name, tmp_dcm_file)
+                            except Exception as e:
+                                print(f"Error processing {sub_label}/{ses_label}/{acq_label}/{file_name}")
+                                print(f"Cannot download dicom file: {e}")
+                            break
+                except KeyError:
+                    pass
 
-
-    if test_acq is None:
+    if not os.path.exists(tmp_dcm_file):
         data_dict['project_id'].append(ses.project)
         data_dict['subject_id'].append(sub_id)
         data_dict['subject_label'].append(sub_label)
@@ -61,7 +87,7 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
         data_dict['file_name'].append(pd.NA)
         data_dict['file_user'].append(pd.NA)
         data_dict['file_created'].append(pd.NA)
-        data_dict['header_deidentification_method'].append('NoSuitableDicomZipFile')
+        data_dict['header_deidentification_method'].append('NoSuitableDicomFile')
         data_dict['header_has_patient_identifiers'].append(pd.NA)
         data_dict['header_patient_identifiers_populated'].append(pd.NA)
         data_dict['session_checked'].append(False)
@@ -82,47 +108,49 @@ def add_first_acquisition_header_info(sub_id, sub_label, ses, patient_identifier
     dcm_has_patient_identifiers = False
     dcm_patient_identifiers_populated = False
 
-    # The actual dcm file (might not have .dcm extension in the zip)
-    # This is extracted from test_file and written to disk
-    tmp_dcm_file = 'deid_header_check_data.dcm'
-
-    if os.path.exists(tmp_dcm_file):
-        os.remove(tmp_dcm_file)
-
-    # Download the first file in the zip archive
     try:
-        fw_dcm = test_file.get_zip_info().members[0]
-        test_file.download_zip_member(fw_dcm.path, tmp_dcm_file)
+        dcm = pydicom.dcmread(tmp_dcm_file)
 
-        # try to read the file, but catch exception
-        try:
-            dcm = pydicom.dcmread(tmp_dcm_file)
+        if 'DeidentificationMethod' in dcm:
+            dcm_deid_method = dcm['DeidentificationMethod'].value
 
-            if ('DeidentificationMethod' in dcm):
-                dcm_deid_method = dcm['DeidentificationMethod'].value
-
-            identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in dcm]
-
+        # helper to check identifiers in a dataset
+        def check_identifiers(ds, patient_identifier_keys):
+            has_identifiers = False
+            populated = False
+            identifier_keys = [id_key for id_key in patient_identifier_keys if id_key in ds]
             for key in identifier_keys:
-                # Need to enumerate data element here and check if empty
-                element = dcm.data_element(key)
+                element = ds.data_element(key)
                 if not element.is_empty:
-                    dcm_has_patient_identifiers = True
-                    # Check for alphanumeric characters
+                    has_identifiers = True
                     if any(char.isalnum() for char in str(element.value)):
-                        dcm_patient_identifiers_populated = True
-            session_checked = True
-        except pydicom.errors.InvalidDicomError:
-            print(f"Cannot read dicom from {sub_label}/{ses_label}/{acq_label}/{file_name}")
-            dcm_deid_method = 'InvalidDicomError'
-            dcm_has_patient_identifiers = 'InvalidDicomError'
-            dcm_patient_identifiers_populated = 'InvalidDicomError'
-    except Exception as e:
-        print(f"Error processing {sub_label}/{ses_label}/{acq_label}/{file_name}")
-        print(f"Cannot download dicom file from zip archive: {e}")
-        dcm_deid_method = 'FlywheelDownloadError'
-        dcm_has_patient_identifiers = 'FlywheelDownloadError'
-        dcm_patient_identifiers_populated = 'FlywheelDownloadError'
+                        populated = True
+            return has_identifiers, populated
+
+        # check top-level dataset
+        has_ids, populated_ids = check_identifiers(dcm, patient_identifier_keys)
+        if has_ids:
+            dcm_has_patient_identifiers = True
+        if populated_ids:
+            dcm_patient_identifiers_populated = True
+
+        # check inside OriginalAttributesSequence (0400,0561)
+        if 'OriginalAttributesSequence' in dcm:
+            for item in dcm.OriginalAttributesSequence:
+                if 'ModifiedAttributesSequence' in item:
+                    for mod in item.ModifiedAttributesSequence:
+                        has_ids, populated_ids = check_identifiers(mod, patient_identifier_keys)
+                        if has_ids:
+                            dcm_has_patient_identifiers = True
+                        if populated_ids:
+                            dcm_patient_identifiers_populated = True
+
+        session_checked = True
+    except pydicom.errors.InvalidDicomError:
+        print(f"Cannot read dicom from {sub_label}/{ses_label}/{acq_label}/{file_name}")
+        dcm_deid_method = 'InvalidDicomError'
+        dcm_has_patient_identifiers = 'InvalidDicomError'
+        dcm_patient_identifiers_populated = 'InvalidDicomError'
     finally:
         if os.path.exists(tmp_dcm_file):
             os.remove(tmp_dcm_file)
