@@ -7,13 +7,18 @@ used to deidentify all data imported to Flywheel.
 
 ### 4.0
 
-Add tags that have been problematic after the XA upgrades to the scanners:
+Add removal of tags that have been problematic after the XA upgrades to the scanners:
 
 - OrderEnteredBy
 - OrderEntererLocation
 - OrderCallbackPhoneNumber
 - OriginalAttributesSequence
 - RequestAttributesSequence
+
+PatientSize is no longer removed.
+
+We now set PregnancyStatus to 4 (unknown) rather than an empty string.
+
 
 ### 3.0
 
