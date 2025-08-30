@@ -15,9 +15,8 @@ Add removal of tags that have been problematic after the XA upgrades to the scan
 - OriginalAttributesSequence
 - RequestAttributesSequence
 
-PatientSize is no longer removed.
-
-We now set PregnancyStatus to 4 (unknown) rather than an empty string.
+PatientSize is no longer emptied, it is instead set to 99. Likewise, PregnancyStatus is
+set to 4 (unknown) rather than an empty string.
 
 
 ### 3.0

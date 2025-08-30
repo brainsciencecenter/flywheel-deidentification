@@ -99,6 +99,8 @@ dicom:
     replace-with: ''
   - name: PatientSexNeutered
     replace-with: ''
+  - name: PatientSize
+    replace-with: 99
   - name: PatientState
     replace-with: ''
   - name: PatientTelecomInformation
