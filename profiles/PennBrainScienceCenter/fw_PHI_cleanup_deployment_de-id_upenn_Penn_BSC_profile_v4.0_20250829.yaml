@@ -115,7 +115,7 @@ dicom:
   - name: PatientSexNeutered
     replace-with: ''
   - name: PatientSize
-    replace-with: 99
+    replace-with: 0
   - name: PatientState
     replace-with: ''
   - name: PatientTelecomInformation
