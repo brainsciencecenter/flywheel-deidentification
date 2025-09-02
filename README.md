@@ -14,9 +14,7 @@ file.
 Flywheel**.
 
 If uploading data manually, or from a new source, you **must** test and verify the
-de-identification. First use `fw deid test` (see the [profile
-page](profiles/PennBrainScienceCenter/README.md) for details). Then upload a single
-session and check carefully. Notify the admins of any problems.
+de-identification. There is unfortunately no way to apply the profile locally.
 
 If you require a different de-identification profile than the site profile, please contact
 the site admin Gaylord Holder to discuss options.
@@ -25,17 +23,12 @@ the site admin Gaylord Holder to discuss options.
 ## How the de-identification works
 
 The [site
-profile](profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml)
-removes direct identifiers and several indirect identifiers not normally required for
-research use. Certain indirect identifiers important for research (such as PatientWeight)
-are retained.
+profile](profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v4.0_20250829.yaml)
+removes direct identifiers and other subject information not normally required for
+research use. Certain subject information important for research (such as PatientWeight)
+is retained.
 
-Data received from the scanner connectors is automatically de-identified using this
-protocol.
-
-Data imported via the web "DICOM Upload" interface also has this profile applied, unless a
-project-level profile is present. Contact the site admin if you need customized
-de-identification.
+Contact the site admin if you need customized de-identification.
 
 **Update 2024-03**: There is a known bug affecting Linux browsers, upload only from Mac or
 Windows. Use the latest Google Chrome. As always, when updating from a new data source or
@@ -49,12 +42,10 @@ profile on the command line. **Do not use `fw import dicom` to import data to Fl
 
 ## Limitations of automated de-identification
 
-The [site
-profile](profiles/PennBrainScienceCenter/de-id_upenn_Penn_BSC_profile_v3.0_20201111A.yaml)
-removes standard dicom tags that are designed to contain direct identifiers. It also
-removes some indirect identifiers that might give clues to the patient's identity or other
-sensitive information like pregnancy status. However, there are some limitations to
-automated de-identification.
+The site profile removes standard dicom tags that are designed to contain direct
+identifiers. It also removes some indirect identifiers that might give clues to the
+patient's identity or other sensitive information like pregnancy status. However, there
+are some limitations to automated de-identification.
 
 Data uploaded manually, or from an external scanner, should be tested and checked thoroughly.
 
