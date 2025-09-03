@@ -1,0 +1,798 @@
+# Proposed de-identification profile - needs editing to keep fields we need
+#
+# This is based on the dicom confidentiality profile with all the available "retain" options
+# except patient characteristics turned on, so UIDs, dates, times
+#
+#
+dicom:
+
+  # patient-age-from-birthdate sets the DICOM header as a 3-digit value with a suffix
+  # be 091D, and that same age in months would be 003M. By default, if
+  # the age fits in days, then days will be used, # otherwise if it fits in months, then months
+  # will be used, otherwise years will be used
+  patient-age-from-birthdate: true
+
+  # Set patient age units as Years. Other options include months (M) and days (D)
+  patient-age-units: Y
+
+  # Don't insert fields if they don't exist in the original file
+  replace-with-insert: false
+
+  # Enable this to recurse into sequences and remove identifiers there too
+  # Need to test this doesn't break anything or slow things down too much
+  # recurse-sequence: true
+
+  # Some fields are listed by tag because they don't exist in the 2024 pydicom dictionary
+  fields:
+  - name: (0008,1301)
+    replace-with: ''
+  - name: (0008,1302)
+    replace-with: ''
+  - name: (0008,1303)
+    replace-with: ''
+  - name: (0008,1304)
+    replace-with: ''
+  - name: (0010,0011)
+    replace-with: ''
+  - name: (0010,0012)
+    replace-with: ''
+  - name: (0010,0013)
+    replace-with: ''
+  - name: (0010,0014)
+    replace-with: ''
+  - name: (0010,0015)
+    replace-with: ''
+  - name: (0010,0016)
+    replace-with: ''
+  - name: (0010,0041)
+    replace-with: ''
+  - name: (0010,0042)
+    replace-with: ''
+  - name: (0010,0043)
+    replace-with: ''
+  - name: (0010,0044)
+    replace-with: ''
+  - name: (0010,0045)
+    replace-with: ''
+  - name: (0010,0046)
+    replace-with: ''
+  - name: (0010,0047)
+    replace-with: ''
+  - name: (0010,2162)
+    replace-with: ''
+  - name: (0040,B03B)
+    replace-with: ''
+  - name: (0040,B03F)
+    replace-with: ''
+  - name: AccessionNumber
+    replace-with: ''
+  - name: AcquisitionComments
+    replace-with: ''
+  - name: AcquisitionContextSequence
+    replace-with: ''
+  - name: AcquisitionDeviceProcessingDescription
+    replace-with: ''
+  - name: AcquisitionFieldOfViewLabel
+    replace-with: ''
+  - name: AcquisitionProtocolDescription
+    replace-with: ''
+  - name: ActualHumanPerformersSequence
+    replace-with: ''
+  - name: AdditionalPatientHistory
+    replace-with: ''
+  - name: AddressTrial
+    replace-with: ''
+  - name: AdmissionID
+    replace-with: ''
+  - name: AdmittingDiagnosesCodeSequence
+    replace-with: ''
+  - name: AdmittingDiagnosesDescription
+    replace-with: ''
+  - name: Allergies
+    replace-with: ''
+  - name: AnnotationGroupDescription
+    replace-with: ''
+  - name: AnnotationGroupLabel
+    replace-with: ''
+  - name: Arbitrary
+    replace-with: ''
+  - name: AudioComments
+    replace-with: ''
+  - name: AudioSampleData
+    replace-with: ''
+  - name: AuthorObserverSequence
+    replace-with: ''
+  - name: AxisLabels
+    replace-with: ''
+  - name: AxisUnits
+    replace-with: ''
+  - name: BarcodeValue
+    replace-with: ''
+  - name: BeamDescription
+    replace-with: ''
+  - name: BolusDescription
+    replace-with: ''
+  - name: BranchOfService
+    replace-with: ''
+  - name: CameraOwnerName
+    replace-with: ''
+  - name: CertificateOfSigner
+    replace-with: ''
+  - name: ClinicalTrialProtocolEthicsCommitteeApprovalNumber
+    replace-with: ''
+  - name: ClinicalTrialProtocolID
+    replace-with: ''
+  - name: ClinicalTrialProtocolName
+    replace-with: ''
+  - name: ClinicalTrialSeriesDescription
+    replace-with: ''
+  - name: ClinicalTrialSeriesID
+    replace-with: ''
+  - name: ClinicalTrialSponsorName
+    replace-with: ''
+  - name: ClinicalTrialSubjectID
+    replace-with: ''
+  - name: ClinicalTrialSubjectReadingID
+    replace-with: ''
+  - name: ClinicalTrialTimePointDescription
+    replace-with: ''
+  - name: ClinicalTrialTimePointID
+    replace-with: ''
+  - name: CommentsOnRadiationDose
+    replace-with: ''
+  - name: CommentsOnThePerformedProcedureStep
+    replace-with: ''
+  - name: CompensatorDescription
+    replace-with: ''
+  - name: ConceptualVolumeCombinationDescription
+    replace-with: ''
+  - name: ConceptualVolumeDescription
+    replace-with: ''
+  - name: ConfidentialityConstraintOnPatientDataDescription
+    replace-with: ''
+  - name: ConsultingPhysicianIdentificationSequence
+    replace-with: ''
+  - name: ConsultingPhysicianName
+    replace-with: ''
+  - name: ContainerComponentID
+    replace-with: ''
+  - name: ContainerDescription
+    replace-with: ''
+  - name: ContainerIdentifier
+    replace-with: ''
+  - name: ContentCreatorIdentificationCodeSequence
+    replace-with: ''
+  - name: ContentCreatorName
+    replace-with: ''
+  - name: ContentSequence
+    replace-with: ''
+  - name: ContrastBolusAgent
+    replace-with: ''
+  - name: ContributionDescription
+    replace-with: ''
+  - name: CountryOfResidence
+    replace-with: ''
+  - name: CurrentObserverTrial
+    replace-with: ''
+  - name: CurrentPatientLocation
+    replace-with: ''
+  - name: CurveData
+    replace-with: ''
+  - name: CurveDescription
+    replace-with: ''
+  - name: CurveDimensions
+    replace-with: ''
+  - name: CurveLabel
+    replace-with: ''
+  - name: CurveReferencedOverlaySequence
+    replace-with: ''
+  - name: CustodialOrganizationSequence
+    replace-with: ''
+  - name: DataSetTrailingPadding
+    replace-with: ''
+  - name: DataValueRepresentation
+    replace-with: ''
+  - name: DecompositionDescription
+    replace-with: ''
+  - name: DerivationDescription
+    replace-with: ''
+  - name: DestinationAE
+    replace-with: ''
+  - name: DeviceAlternateIdentifier
+    replace-with: ''
+  - name: DeviceSettingDescription
+    replace-with: ''
+  - name: DigitalSignaturesSequence
+    replace-with: ''
+  - name: DigitalSignatureUID
+    replace-with: ''
+  - name: DischargeDiagnosisDescription
+    replace-with: ''
+  - name: DisplacementReferenceLabel
+    replace-with: ''
+  - name: DistributionAddress
+    replace-with: ''
+  - name: DistributionName
+    replace-with: ''
+  - name: DoseReferenceDescription
+    replace-with: ''
+  - name: EncapsulatedDocument
+    replace-with: ''
+  - name: EntityDescription
+    replace-with: ''
+  - name: EntityLabel
+    replace-with: ''
+  - name: EntityLongLabel
+    replace-with: ''
+  - name: EntityName
+    replace-with: ''
+  - name: EquipmentFrameOfReferenceDescription
+    replace-with: ''
+  - name: EthnicGroup
+    replace-with: ''
+  - name: EthnicGroupCodeSequence
+    replace-with: ''
+  - name: FillerOrderNumberImagingServiceRequest
+    replace-with: ''
+  - name: FilterLookupTableDescription
+    replace-with: ''
+  - name: FixationDeviceDescription
+    replace-with: ''
+  - name: FlowIdentifier
+    replace-with: ''
+  - name: FlowIdentifierSequence
+    replace-with: ''
+  - name: FractionationNotes
+    replace-with: ''
+  - name: FractionGroupDescription
+    replace-with: ''
+  - name: FrameComments
+    replace-with: ''
+  - name: GPSAltitude
+    replace-with: ''
+  - name: GPSAltitudeRef
+    replace-with: ''
+  - name: GPSAreaInformation
+    replace-with: ''
+  - name: GPSDestBearing
+    replace-with: ''
+  - name: GPSDestBearingRef
+    replace-with: ''
+  - name: GPSDestDistance
+    replace-with: ''
+  - name: GPSDestDistanceRef
+    replace-with: ''
+  - name: GPSDestLatitude
+    replace-with: ''
+  - name: GPSDestLatitudeRef
+    replace-with: ''
+  - name: GPSDestLongitude
+    replace-with: ''
+  - name: GPSDestLongitudeRef
+    replace-with: ''
+  - name: GPSDifferential
+    replace-with: ''
+  - name: GPSDOP
+    replace-with: ''
+  - name: GPSImgDirection
+    replace-with: ''
+  - name: GPSImgDirectionRef
+    replace-with: ''
+  - name: GPSLatitude
+    replace-with: ''
+  - name: GPSLatitudeRef
+    replace-with: ''
+  - name: GPSLongitude
+    replace-with: ''
+  - name: GPSLongitudeRef
+    replace-with: ''
+  - name: GPSMapDatum
+    replace-with: ''
+  - name: GPSMeasureMode
+    replace-with: ''
+  - name: GPSProcessingMethod
+    replace-with: ''
+  - name: GPSSatellites
+    replace-with: ''
+  - name: GPSSpeed
+    replace-with: ''
+  - name: GPSSpeedRef
+    replace-with: ''
+  - name: GPSStatus
+    replace-with: ''
+  - name: GPSTimeStamp
+    replace-with: ''
+  - name: GPSTrack
+    replace-with: ''
+  - name: GPSTrackRef
+    replace-with: ''
+  - name: GPSVersionID
+    replace-with: ''
+  - name: GraphicAnnotationSequence
+    replace-with: ''
+  - name: HumanPerformerName
+    replace-with: ''
+  - name: HumanPerformerOrganization
+    replace-with: ''
+  - name: IconImageSequence
+    replace-with: ''
+  - name: IdentifyingComments
+    replace-with: ''
+  - name: ImageComments
+    replace-with: ''
+  - name: ImagePresentationComments
+    replace-with: ''
+  - name: ImagingServiceRequestComments
+    replace-with: ''
+  - name: Impressions
+    replace-with: ''
+  - name: InstanceOriginStatus
+    replace-with: ''
+  - name: InsurancePlanIdentification
+    replace-with: ''
+  - name: IntendedRecipientsOfResultsIdentificationSequence
+    replace-with: ''
+  - name: InterlockDescription
+    replace-with: ''
+  - name: InterlockOriginDescription
+    replace-with: ''
+  - name: InterpretationApproverSequence
+    replace-with: ''
+  - name: InterpretationAuthor
+    replace-with: ''
+  - name: InterpretationDiagnosisDescription
+    replace-with: ''
+  - name: InterpretationID
+    replace-with: ''
+  - name: InterpretationIDIssuer
+    replace-with: ''
+  - name: InterpretationRecorder
+    replace-with: ''
+  - name: InterpretationText
+    replace-with: ''
+  - name: InterpretationTranscriber
+    replace-with: ''
+  - name: IssuerOfAdmissionID
+    replace-with: ''
+  - name: IssuerOfAdmissionIDSequence
+    replace-with: ''
+  - name: IssuerOfClinicalTrialProtocolID
+    replace-with: ''
+  - name: IssuerOfClinicalTrialSeriesID
+    replace-with: ''
+  - name: IssuerOfClinicalTrialSiteID
+    replace-with: ''
+  - name: IssuerOfClinicalTrialSubjectID
+    replace-with: ''
+  - name: IssuerOfClinicalTrialSubjectReadingID
+    replace-with: ''
+  - name: IssuerOfClinicalTrialTimePointID
+    replace-with: ''
+  - name: IssuerOfPatientID
+    replace-with: ''
+  - name: IssuerOfServiceEpisodeID
+    replace-with: ''
+  - name: IssuerOfServiceEpisodeIDSequence
+    replace-with: ''
+  - name: IssuerOfTheContainerIdentifierSequence
+    replace-with: ''
+  - name: IssuerOfTheSpecimenIdentifierSequence
+    replace-with: ''
+  - name: LabelText
+    replace-with: ''
+  - name: LongDeviceDescription
+    replace-with: ''
+  - name: MAC
+    replace-with: ''
+  - name: MakerNote
+    replace-with: ''
+  - name: MedicalAlerts
+    replace-with: ''
+  - name: MedicalRecordLocator
+    replace-with: ''
+  - name: MilitaryRank
+    replace-with: ''
+  - name: ModifiedAttributesSequence
+    replace-with: ''
+  - name: ModifiedImageDescription
+    replace-with: ''
+  - name: MultienergyAcquisitionDescription
+    replace-with: ''
+  - name: NameOfPhysiciansReadingStudy
+    replace-with: ''
+  - name: NamesOfIntendedRecipientsOfResults
+    replace-with: ''
+  - name: NetworkID
+    replace-with: ''
+  - name: NonconformingDataElementValue
+    replace-with: ''
+  - name: NonconformingModifiedAttributesSequence
+    replace-with: ''
+  - name: NumberOfPoints
+    replace-with: ''
+  - name: Occupation
+    replace-with: ''
+  - name: OperatorIdentificationSequence
+    replace-with: ''
+  - name: OperatorsName
+    replace-with: ''
+  - name: OrderCallbackPhoneNumber
+    replace-with: ''
+  - name: OrderCallbackTelecomInformation
+    replace-with: ''
+  - name: OrderEnteredBy
+    replace-with: ''
+  - name: OrderEntererLocation
+    replace-with: ''
+  - name: OriginalAttributesSequence
+    replace-with: ''
+  - name: Originator
+    replace-with: ''
+  - name: OtherClinicalTrialProtocolIDsSequence
+    replace-with: ''
+  - name: OtherPatientIDs
+    replace-with: ''
+  - name: OtherPatientIDsSequence
+    replace-with: ''
+  - name: OtherPatientNames
+    replace-with: ''
+  - name: OverlayComments
+    replace-with: ''
+  - name: OverlayData
+    replace-with: ''
+  - name: ParticipantSequence
+    replace-with: ''
+  - name: PatientAddress
+    replace-with: ''
+  - name: PatientAge
+    replace-with: ''
+  - name: PatientBirthDate
+    replace-with: ''
+  - name: PatientBirthName
+    replace-with: ''
+  - name: PatientBirthTime
+    replace-with: ''
+  - name: PatientComments
+    replace-with: ''
+  - name: PatientID
+    replace-with: ''
+  - name: PatientInstitutionResidence
+    replace-with: ''
+  - name: PatientInsurancePlanCodeSequence
+    replace-with: ''
+  - name: PatientMotherBirthName
+    replace-with: ''
+  - name: PatientName
+    replace-with: ''
+  - name: PatientPrimaryLanguageCodeSequence
+    replace-with: ''
+  - name: PatientPrimaryLanguageModifierCodeSequence
+    replace-with: ''
+  - name: PatientReligiousPreference
+    replace-with: ''
+  - name: PatientSetupPhotoDescription
+    replace-with: ''
+  - name: PatientSex
+    replace-with: ''
+  - name: PatientSexNeutered
+    replace-with: ''
+  - name: PatientSize
+    replace-with: 0
+  - name: PatientState
+    replace-with: ''
+  - name: PatientTelecomInformation
+    replace-with: ''
+  - name: PatientTelephoneNumbers
+    replace-with: ''
+  - name: PatientTransportArrangements
+    replace-with: ''
+  - name: PatientTreatmentPreparationMethodDescription
+    replace-with: ''
+  - name: PatientTreatmentPreparationProcedureParameterDescription
+    replace-with: ''
+  - name: PatientWeight
+    replace-with: ''
+  - name: PerformedLocation
+    replace-with: ''
+  - name: PerformedProcedureStepDescription
+    replace-with: ''
+  - name: PerformedProcedureStepID
+    replace-with: ''
+  - name: PerformedStationAETitle
+    replace-with: ''
+  - name: PerformingPhysicianIdentificationSequence
+    replace-with: ''
+  - name: PerformingPhysicianName
+    replace-with: ''
+  - name: PersonAddress
+    replace-with: ''
+  - name: PersonIdentificationCodeSequence
+    replace-with: ''
+  - name: PersonName
+    replace-with: ''
+  - name: PersonTelecomInformation
+    replace-with: ''
+  - name: PersonTelephoneNumbers
+    replace-with: ''
+  - name: PhysicianApprovingInterpretation
+    replace-with: ''
+  - name: PhysiciansOfRecord
+    replace-with: ''
+  - name: PhysiciansOfRecordIdentificationSequence
+    replace-with: ''
+  - name: PhysiciansReadingStudyIdentificationSequence
+    replace-with: ''
+  - name: PlacerOrderNumberImagingServiceRequest
+    replace-with: ''
+  - name: PositionAcquisitionTemplateDescription
+    replace-with: ''
+  - name: PositionAcquisitionTemplateName
+    replace-with: ''
+  - name: PregnancyStatus
+    replace-with: 4
+  - name: PreMedication
+    replace-with: ''
+  - name: PrescriptionDescription
+    replace-with: ''
+  - name: PrescriptionNotes
+    replace-with: ''
+  - name: PrescriptionNotesSequence
+    replace-with: ''
+  - name: PriorTreatmentDoseDescription
+    replace-with: ''
+  - name: ProtocolName
+    replace-with: ''
+  - name: PyramidDescription
+    replace-with: ''
+  - name: PyramidLabel
+    replace-with: ''
+  - name: RadiationDoseIdentificationLabel
+    replace-with: ''
+  - name: RadiationDoseInVivoMeasurementLabel
+    replace-with: ''
+  - name: RadiationGenerationModeDescription
+    replace-with: ''
+  - name: RadiationGenerationModeLabel
+    replace-with: ''
+  - name: ReasonForOmissionDescription
+    replace-with: ''
+  - name: ReasonForRequestedProcedureCodeSequence
+    replace-with: ''
+  - name: ReasonForStudy
+    replace-with: ''
+  - name: ReasonForSuperseding
+    replace-with: ''
+  - name: ReasonForTheAttributeModification
+    replace-with: ''
+  - name: ReasonForTheImagingServiceRequest
+    replace-with: ''
+  - name: ReasonForTheRequestedProcedure
+    replace-with: ''
+  - name: ReasonForVisit
+    replace-with: ''
+  - name: ReasonForVisitCodeSequence
+    replace-with: ''
+  - name: ReceivingAE
+    replace-with: ''
+  - name: ReferencedDigitalSignatureSequence
+    replace-with: ''
+  - name: ReferencedPatientAliasSequence
+    replace-with: ''
+  - name: ReferencedPatientPhotoSequence
+    replace-with: ''
+  - name: ReferencedSOPInstanceMACSequence
+    replace-with: ''
+  - name: ReferringPhysicianAddress
+    replace-with: ''
+  - name: ReferringPhysicianIdentificationSequence
+    replace-with: ''
+  - name: ReferringPhysicianName
+    replace-with: ''
+  - name: ReferringPhysicianTelephoneNumbers
+    replace-with: ''
+  - name: RegionOfResidence
+    replace-with: ''
+  - name: RequestAttributesSequence
+    replace-with: ''
+  - name: RequestedContrastAgent
+    replace-with: ''
+  - name: RequestedProcedureComments
+    replace-with: ''
+  - name: RequestedProcedureDescription
+    replace-with: ''
+  - name: RequestedProcedureID
+    replace-with: ''
+  - name: RequestedProcedureLocation
+    replace-with: ''
+  - name: RequestedSeriesDescription
+    replace-with: ''
+  - name: RequestingAE
+    replace-with: ''
+  - name: RequestingPhysician
+    replace-with: ''
+  - name: RequestingService
+    replace-with: ''
+  - name: RespiratoryMotionCompensationTechniqueDescription
+    replace-with: ''
+  - name: ResponsibleOrganization
+    replace-with: ''
+  - name: ResponsiblePerson
+    replace-with: ''
+  - name: ResultsComments
+    replace-with: ''
+  - name: ResultsDistributionListSequence
+    replace-with: ''
+  - name: ResultsID
+    replace-with: ''
+  - name: ResultsIDIssuer
+    replace-with: ''
+  - name: RetrieveAETitle
+    replace-with: ''
+  - name: ReviewerName
+    replace-with: ''
+  - name: ROICreatorSequence
+    replace-with: ''
+  - name: ROIDescription
+    replace-with: ''
+  - name: ROIGenerationDescription
+    replace-with: ''
+  - name: ROIInterpreter
+    replace-with: ''
+  - name: ROIInterpreterSequence
+    replace-with: ''
+  - name: ROIName
+    replace-with: ''
+  - name: ROIObservationDescription
+    replace-with: ''
+  - name: ROIObservationLabel
+    replace-with: ''
+  - name: RTAccessoryDeviceSlotID
+    replace-with: ''
+  - name: RTAccessoryHolderSlotID
+    replace-with: ''
+  - name: RTPhysicianIntentNarrative
+    replace-with: ''
+  - name: RTPlanDescription
+    replace-with: ''
+  - name: RTPlanLabel
+    replace-with: ''
+  - name: RTPlanName
+    replace-with: ''
+  - name: RTPrescriptionLabel
+    replace-with: ''
+  - name: RTToleranceSetLabel
+    replace-with: ''
+  - name: RTTreatmentApproachLabel
+    replace-with: ''
+  - name: ScheduledHumanPerformersSequence
+    replace-with: ''
+  - name: ScheduledPatientInstitutionResidence
+    replace-with: ''
+  - name: ScheduledPerformingPhysicianIdentificationSequence
+    replace-with: ''
+  - name: ScheduledPerformingPhysicianName
+    replace-with: ''
+  - name: ScheduledProcedureStepDescription
+    replace-with: ''
+  - name: ScheduledProcedureStepID
+    replace-with: ''
+  - name: ScheduledStationAETitle
+    replace-with: ''
+  - name: ScheduledStudyLocationAETitle
+    replace-with: ''
+  - name: SelectorAEValue
+    replace-with: ''
+  - name: SelectorASValue
+    replace-with: ''
+  - name: SelectorLOValue
+    replace-with: ''
+  - name: SelectorLTValue
+    replace-with: ''
+  - name: SelectorOBValue
+    replace-with: ''
+  - name: SelectorPNValue
+    replace-with: ''
+  - name: SelectorSHValue
+    replace-with: ''
+  - name: SelectorSTValue
+    replace-with: ''
+  - name: SelectorUNValue
+    replace-with: ''
+  - name: SelectorURValue
+    replace-with: ''
+  - name: SelectorUTValue
+    replace-with: ''
+  - name: SeriesDescription
+    replace-with: ''
+  - name: ServiceEpisodeDescription
+    replace-with: ''
+  - name: ServiceEpisodeID
+    replace-with: ''
+  - name: SetupTechniqueDescription
+    replace-with: ''
+  - name: ShieldingDeviceDescription
+    replace-with: ''
+  - name: SlideIdentifier
+    replace-with: ''
+  - name: SmokingStatus
+    replace-with: ''
+  - name: SourceIdentifier
+    replace-with: ''
+  - name: SpecialNeeds
+    replace-with: ''
+  - name: SpecimenAccessionNumber
+    replace-with: ''
+  - name: SpecimenDetailedDescription
+    replace-with: ''
+  - name: SpecimenIdentifier
+    replace-with: ''
+  - name: SpecimenPreparationSequence
+    replace-with: ''
+  - name: SpecimenShortDescription
+    replace-with: ''
+  - name: StationAETitle
+    replace-with: ''
+  - name: StructureSetDescription
+    replace-with: ''
+  - name: StructureSetLabel
+    replace-with: ''
+  - name: StructureSetName
+    replace-with: ''
+  - name: StudyComments
+    replace-with: ''
+  - name: StudyDescription
+    replace-with: ''
+  - name: StudyID
+    replace-with: ''
+  - name: StudyIDIssuer
+    replace-with: ''
+  - name: TelephoneNumberTrial
+    replace-with: ''
+  - name: TextComments
+    replace-with: ''
+  - name: TextString
+    replace-with: ''
+  - name: TopicAuthor
+    replace-with: ''
+  - name: TopicKeywords
+    replace-with: ''
+  - name: TopicSubject
+    replace-with: ''
+  - name: TopicTitle
+    replace-with: ''
+  - name: TreatmentPositionGroupLabel
+    replace-with: ''
+  - name: TreatmentSite
+    replace-with: ''
+  - name: TreatmentSites
+    replace-with: ''
+  - name: TreatmentTechniqueNotes
+    replace-with: ''
+  - name: TreatmentToleranceViolationDescription
+    replace-with: ''
+  - name: TypeOfData
+    replace-with: ''
+  - name: UID
+    replace-with: ''
+  - name: UserContentLabel
+    replace-with: ''
+  - name: UserContentLongLabel
+    replace-with: ''
+  - name: VerbalSourceIdentifierCodeSequenceTrial
+    replace-with: ''
+  - name: VerbalSourceTrial
+    replace-with: ''
+  - name: VerifyingObserverIdentificationCodeSequence
+    replace-with: ''
+  - name: VerifyingObserverName
+    replace-with: ''
+  - name: VerifyingObserverSequence
+    replace-with: ''
+  - name: VerifyingOrganization
+    replace-with: ''
+  - name: VisitComments
+    replace-with: ''
+  - name: WaveformFilterDescription
+    replace-with: ''
+  - name: DeidentificationMethod
+    replace-with: Penn_BSC_profile_v5.0
